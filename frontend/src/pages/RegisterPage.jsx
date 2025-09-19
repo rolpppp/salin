@@ -8,6 +8,7 @@ const RegisterPage = () => {
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    
     const navigate = useNavigate();
 
     const handleRegister = async (e) => {
@@ -25,18 +26,19 @@ const RegisterPage = () => {
             return;
         }
 
-        try{
-            const { error } = await supabase.auth.signUp({
-            email: email,
-            password: password,
+        const { error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
         });
+
+        if (error){
+            setError(error.message);
+        } else{
             alert('Registration successful! Please check your email to verify your account.');
             navigate('/login');
-        } catch (error){
-            setError(error.message);
-        } finally {
-            setLoading(false);
         }
+        setLoading(false);
+    
     };
 
     return (
