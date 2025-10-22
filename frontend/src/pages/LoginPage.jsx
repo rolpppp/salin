@@ -28,17 +28,16 @@ const LoginPage = () => {
     };
 
     return (
-         <div className="flex items-center justify-center min-h-screen">
-            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-lg shadow-md">
-                <h2 className="text-2xl font-bold text-center">Log In to Your Account</h2>
-                <form onSubmit={handleLogin} className="space-y-6">
-                    {/* Form inputs are identical to the register page */}
+        <MobileShell title="Salin">
+            <div className="p-6 space-y-6">
+                <h2 className="text-xl font-bold text-center">Log In to Your Account</h2>
+                <form onSubmit={handleLogin} className="space-y-4">
                     <div>
-                        <label htmlFor="email">Email</label>
+                        <label htmlFor="email" className="block text-sm">Email</label>
                         <input id="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required className="w-full px-3 py-2 mt-1 border rounded-md"/>
                     </div>
                     <div>
-                        <label htmlFor="password">Password</label>
+                        <label htmlFor="password" className="block text-sm">Password</label>
                         <input id="password" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required className="w-full px-3 py-2 mt-1 border rounded-md"/>
                     </div>
                     {error && <p className="text-sm text-red-600">{error}</p>}
@@ -52,8 +51,8 @@ const LoginPage = () => {
                     </p>
                 </form>
             </div>
-        </div>
-    );
+        </MobileShell>
+    )
 };
 
 export default LoginPage;

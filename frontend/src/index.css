@@ -37,6 +37,74 @@ h1 {
   line-height: 1.1;
 }
 
+/* Mobile-first shell styles */
+.mobile-viewport {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  background-color: #2f2f2f;
+}
+
+.mobile-device {
+  width: 360px;
+  max-width: calc(100% - 32px);
+  height: 780px;
+  background: linear-gradient(180deg, #ffffff 0%, #fbfbfb 100%);
+  border-radius: 24px;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.5);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  border: 6px solid rgba(0,0,0,0.12);
+}
+
+.mobile-header {
+  padding: 18px 18px 8px 18px;
+  background: linear-gradient(90deg,#2fb59a,#3bb6b0);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+.mobile-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.mobile-content {
+  padding: 18px;
+  overflow: auto;
+  flex: 1 1 auto;
+  -webkit-overflow-scrolling: touch;
+  background: transparent;
+}
+
+.mobile-bottom-notch {
+  height: 28px;
+  background: linear-gradient(180deg, rgba(0,0,0,0.06), rgba(0,0,0,0.02));
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+/* Make form elements slightly larger for touch */
+input, select, textarea, button {
+  font-size: 15px;
+}
+
+/* Responsive: on very small screens, shrink device to fit */
+@media (max-width: 380px) {
+  .mobile-device { width: calc(100% - 24px); height: calc(100vh - 24px); border-radius: 16px; }
+}
+
+/* Desktop: center device on larger screens */
+@media (min-width: 900px) {
+  .mobile-viewport { background-color: #2f2f2f; }
+}
+
 button {
   border-radius: 8px;
   border: 1px solid transparent;
