@@ -1,0 +1,20 @@
+{
+  "name": "salin",
+  "version": "1.0.0",
+  "description": "A web-based money tracker for college students.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rolpppp/salin.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rolpppp/salin/issues"
+  },
+  "homepage": "https://github.com/rolpppp/salin#readme"
+}
