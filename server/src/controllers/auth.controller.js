@@ -1,4 +1,5 @@
 const supabase = require("../config/supabase");
+const jwt = require("jsonwebtoken");
 
 // register a new user
 exports.registerUser = async (req, res, next) => {
@@ -39,9 +40,25 @@ exports.loginUser = async (req, res, next) => {
     });
 
     if (error) {
-      return { success: false, error: error.message };
+      res.status(401).json({ error: "Invalid log in credentials" });
+    } else {
+      const payload = {
+        id: data.user.id,
+        email: data.user.email,
+      };
+
+      if (!process.env.JWT_SECRET) {
+        return res
+          .status(500)
+          .json({ error: "Authentication not configured." });
+      }
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: "1d", // token expires in 1 day
+      });
+
+      res.status(200).json({ message: "Log in successful", token });
     }
-    res.status(200).json({ message: "Log in successful" });
   } catch (error) {
     next(error);
   }
