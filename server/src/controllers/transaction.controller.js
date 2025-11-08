@@ -72,7 +72,7 @@ exports.updateTransaction = async (req, res, next) => {
   const userId = req.user.id;
   const { id } = req.params;
   const updates = req.body;
-  console.log({ id });
+
   try {
     // verify if transaction belongs to the user
     const { data: existingTransaction, error: findError } = await supabase
