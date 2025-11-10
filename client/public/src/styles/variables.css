@@ -1,0 +1,34 @@
+:root {
+  /* Colors */
+  --primary-color: #4f46e5; /* A nice modern indigo */
+  --primary-dark-color: #4338ca;
+  --secondary-color: #10b981; /* Green for income/success */
+  --danger-color: #ef4444; /* Red for expenses/errors */
+  --background-color: #f8f9fa;
+  --card-bg-color: #ffffff;
+  --text-color: #212529;
+  --text-light-color: #6c757d;
+  --border-color: #e9ecef;
+
+  /* Spacing */
+  --space-xs: 0.25rem;
+  --space-sm: 0.5rem;
+  --space-md: 1rem;
+  --space-lg: 1.5rem;
+  --space-xl: 2rem;
+
+  /* Typography */
+  --font-family: "Inter", sans-serif; /* Add Inter from Google Fonts for a modern look */
+  --font-size-sm: 0.875rem;
+  --font-size-base: 1rem;
+  --font-size-lg: 1.125rem;
+  --font-size-xl: 1.5rem;
+
+  /* Borders & Shadows */
+  --border-radius: 8px;
+  --box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -2px rgba(0, 0, 0, 0.1);
+
+  /* Breakpoints for Responsive Design */
+  --breakpoint-md: 768px; /* Tablet */
+}
