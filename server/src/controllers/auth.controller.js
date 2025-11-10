@@ -57,9 +57,14 @@ exports.loginUser = async (req, res, next) => {
         expiresIn: "1d", // token expires in 1 day
       });
 
-      res
-        .status(200)
-        .json({ message: "Log in successful", token, data: `${data.user.id}` });
+      res.status(200).json({
+        message: "Log in successful",
+        token,
+        user: {
+          id: data.user.id,
+          email: data.user.email,
+        },
+      });
     }
   } catch (error) {
     next(error);
