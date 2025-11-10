@@ -68,7 +68,7 @@ function renderRecentTransactions(transactions) {
     <li>
       <div class="transaction-details">
         <div class="title">${t.title}</div>
-        <div class="category">${new Date(t.date).toLocaleDateString()}</div>
+        <div class="date">${new Date(t.date).toLocaleDateString()}</div>
       </div>
       <div class="transaction-amount ${t.type}">
         ${t.type === "income" ? "+" : "-"}₱${parseFloat(t.amount).toFixed(2)}
