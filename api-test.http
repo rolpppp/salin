@@ -1,0 +1,122 @@
+### api-tests.http - A complete testing suite for the salin API
+
+@baseUrl = http://localhost:3000/api
+@email = testuser{{$randomInt}}@example.com
+@password = Password123!
+@token = 
+###
+# ======================================================================
+# AUTHENTICATION FLOW
+# ======================================================================
+
+### 1. Register a new user
+# @name registerUser
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+    "email": "{{email}}",
+    "password": "{{password}}"
+}
+
+### 2. Log in with the new user to get a token
+# @name loginUser
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+    "email": "{{email}}",
+    "password": "{{password}}"
+}
+
+### 
+# This script captures the token from the login response and saves it to the @token variable
+@token = 
+### TEST: Try to access a protected route WITHOUT a token (should fail)
+GET {{baseUrl}}/accounts
+
+###
+# ======================================================================
+# ACCOUNTS, CATEGORIES, BUDGET FLOW
+# ======================================================================
+
+### 3. Create a new financial account
+# @name createAccount
+POST {{baseUrl}}/accounts
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "Main Bank Account",
+    "type": "checking",
+    "balance": 1000
+}
+###
+# Capture the ID of the new account
+@accountId = {{createAccount.response.body.account.id}}
+
+### 4. Create a new category
+# @name createCategory
+POST {{baseUrl}}/categories
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "name": "Groceries",
+    "type": "expense"
+}
+###
+# Capture the ID of the new category
+@categoryId = {{createCategory.response.body.category.id}}
+
+### 5. Set a monthly budget
+POST {{baseUrl}}/budget
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "month": 11,
+    "year": 2025,
+    "amount": 500
+}
+
+###
+# ======================================================================
+# TRANSACTIONS & GEMINI FLOW
+# ======================================================================
+
+### 6. Create a transaction (this will test our RPC function)
+POST {{baseUrl}}/transactions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "title": "First grocery run",
+    "amount": 75.50,
+    "type": "expense",
+    "date": "2025-11-05",
+    "description": "Weekly shopping",
+    "account_id": "5c9cf15c-c9d2-42c6-b962-c2f47f05234f",
+    "category_id": "a2d57d1c-9306-4c31-8d94-126e8beee71f"
+}
+
+### 7. Get all accounts to verify the balance was updated
+GET {{baseUrl}}/accounts
+Authorization: Bearer {{token}}
+
+### 8. Get the current budget to verify 'spent' amount was updated
+GET {{baseUrl}}/budget/current
+Authorization: Bearer {{token}}
+
+### 9. Get all transactions to see our new entry
+GET {{baseUrl}}/transactions
+Authorization: Bearer {{token}}
+
+### 10. Test the Gemini AI Parser
+POST {{baseUrl}}/parse
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+    "text": "Paid for internet bill $60 and got a coffee for 5 dollars yesterday"
+}
