@@ -28,11 +28,17 @@ async function request(endpoint, options = {}) {
 }
 
 // --- Auth Endpoints ---
-export function loginUser(email, password) {
-  return request("/auth/login", {
+export async function loginUser(email, password) {
+  const response = await request("/auth/login", {
     method: "POST",
     body: JSON.stringify({ email, password }),
   });
+
+  if (response.user){
+    localStorage.setItem("user_id", response.user.id);
+  }
+
+  return response;
 }
 
 export function registerUser(email, password) {
@@ -42,6 +48,10 @@ export function registerUser(email, password) {
   });
 }
 
+// --- Getting User ID ---
+export function getUserID(){
+  return localStorage.getItem("user_id");
+}
 // --- Dashboard Endpoints ---
 export function getDashboardData() {
   const token = localStorage.getItem("token");
@@ -49,5 +59,29 @@ export function getDashboardData() {
 
   return request("/dashboard", {
     headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
+function getAuthHeaders() {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No auth token found.");
+  return { "Authorization": `Bearer ${token}`};
+}
+
+// --- Data Fetching Endpoints ---
+export function getAccounts() {
+  return request("/accounts", { headers: getAuthHeaders()});
+}
+
+export function getCategories(type) {
+  return request(`/categories/type/${type}`, {headers: getAuthHeaders()});
+}
+
+// --- Data Mutation Endpoints ---
+export function createTransaction(transactionData) {
+  return request("/transactions", {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(transactionData)
   });
 }

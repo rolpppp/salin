@@ -1,8 +1,10 @@
 import { getDashboardData } from "../api.js";
+import { openTransactionForm } from "../components/TransactionForm.js";
 
 export async function renderDashboardPage(app) {
   try {
     const data = await getDashboardData();
+    console.log(data.budget.spent)
     console.log("hello");
     const user = JSON.parse(localStorage.getItem("user"));
     console.log("Username: ", user);
@@ -46,6 +48,10 @@ export async function renderDashboardPage(app) {
       </div>
     `;
 
+    window.addEventListener("transactionsUpdated", () => {
+      renderDashboardPage(app)
+    });
+
     renderRecentTransactions(data.recentTransactions);
     attachDashboardListeners();
   } catch (error) {
@@ -88,11 +94,11 @@ function attachDashboardListeners() {
 
   const addExpenseBtn = document.getElementById("add-expense-btn");
   addExpenseBtn.addEventListener("click", () => {
-    alert("Add Expense form coming soon!");
+    openTransactionForm("expense")
   });
 
   const addIncomeBtn = document.getElementById("add-income-btn");
   addIncomeBtn.addEventListener("click", () => {
-    alert("Add Income form coming soon!");
+    openTransactionForm("income")
   });
 }
