@@ -4,9 +4,16 @@ const supabase = require("../config/supabase");
 exports.getDashboardData = async (req, res, next) => {
   const userId = req.user.id;
   const now = new Date();
-  const month = now.getMonth() + 1;
+  const type = "expense";
   const year = now.getFullYear();
+  const month = now.getMonth() + 1;
+  
+  // Start of current month
   const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+  
+  // End of current month (start of next month - 1 day)
+  const endOfMonth = new Date(year, month, 0); // Last day of current month
+  const endDate = endOfMonth.toISOString().split("T")[0];
 
   try {
     // getting total balance, 5 recent transactions, budget, total spent
@@ -14,7 +21,7 @@ exports.getDashboardData = async (req, res, next) => {
       totalBalanceData,
       recentTransactionsData,
       budgetData,
-      totalSpentData,
+      totalSpentData
     ] = await Promise.all([
       // getting total balance from all accounts
       supabase.from("accounts").select("balance").eq("user_id", userId),
@@ -22,9 +29,9 @@ exports.getDashboardData = async (req, res, next) => {
       // getting 5 most recent transactions
       supabase
         .from("transactions")
-        .select("title, amount, type, date")
+        .select("title, amount, date, type")
         .eq("user_id", userId)
-        .order("date", { ascending: false })
+        .order("created_at", { ascending: false })
         .limit(5),
 
       // getting the budget for current month
@@ -36,17 +43,16 @@ exports.getDashboardData = async (req, res, next) => {
         .eq("year", year)
         .single(),
 
-      // getting total spent for the current month
+      // total spent
       supabase
         .from("transactions")
-        .select("amount")
+        .select("total:amount.sum()")
         .eq("user_id", userId)
-        .eq("type", "expenses")
-        .gte("date", startDate)
-        .lte("date", now.toISOString().split("T")[0]),
+        .eq("type", type)
+        .gte("date",  startDate)
+        .lte("date", endDate).single()
     ]);
 
-    if (totalBalanceData.error) throw totalBalanceData.error;
     if (recentTransactionsData.error) throw recentTransactionsData.error;
     // budgetData.error can be PGRST116 (no rows) which is OK - we'll handle it below
     if (budgetData.error && budgetData.error.code !== "PGRST116")
@@ -58,10 +64,9 @@ exports.getDashboardData = async (req, res, next) => {
       (sum, account) => sum + parseFloat(account.balance),
       0
     );
-    const totalSpent = totalSpentData.data.reduce(
-      (sum, t) => sum + parseFloat(t.amount),
-      0
-    );
+
+    // total
+    const totalSpent = totalSpentData.data?.total || 0;
 
     const dashboardData = {
       totalBalance: totalBalance,
@@ -71,7 +76,6 @@ exports.getDashboardData = async (req, res, next) => {
         spent: totalSpent,
       },
     };
-
     res.status(200).json(dashboardData);
   } catch (error) {
     next(error);
