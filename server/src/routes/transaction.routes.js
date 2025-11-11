@@ -8,7 +8,7 @@ router.use(authMiddleware);
 
 // CRUD for transactions
 router.post("/", transactionController.createTransaction);
-router.get("/", transactionController.getTransaction);
+router.get("/", transactionController.getTransactions);
 router.put("/:id", transactionController.updateTransaction);
 router.delete("/:id", transactionController.deleteTransaction);
 
