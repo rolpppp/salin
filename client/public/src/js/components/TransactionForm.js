@@ -1,10 +1,10 @@
 import { showModal, hideModal } from "./Modal.js";
-import { getAccounts, getUserID, getCategories, createTransaction } from "../api.js";
+import { getAccounts, getUserID, getCategoriesByType, createTransaction } from "../api.js";
 
 export async function openTransactionForm(type){
     const [accounts, categories] = await Promise.all([
         getAccounts(),
-        getCategories(type)
+        getCategoriesByType(type)
     ]);
 
     const title = type === "expense" ? "Add New Expense" : "Add New Income";
