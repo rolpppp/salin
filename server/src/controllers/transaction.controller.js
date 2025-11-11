@@ -42,7 +42,7 @@ exports.createTransaction = async (req, res, next) => {
 };
 
 // get all transactions
-exports.getTransaction = async (req, res, next) => {
+exports.getTransactions = async (req, res, next) => {
   const userId = req.user.id;
   const { startDate, endDate, type, categoryId, accountId, search } = req.query; //filtering or sorting
 
@@ -51,11 +51,11 @@ exports.getTransaction = async (req, res, next) => {
       .from("transactions")
       .select(`
         *,
-        categories (name),
-        account(name)
+        categories(name),
+        accounts(name)
         `)
       .eq("user_id", userId)
-      .order("create_at", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (startDate) query = query.gte('date', startDate);
     if (endDate) query = query.lte('date', endDate);
