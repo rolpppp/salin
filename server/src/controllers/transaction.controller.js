@@ -44,18 +44,25 @@ exports.createTransaction = async (req, res, next) => {
 // get all transactions
 exports.getTransaction = async (req, res, next) => {
   const userId = req.user.id;
-  const { limit, sortBy = "date", order = "desc" } = req.query; //filtering or sorting
+  const { startDate, endDate, type, categoryId, accountId, search } = req.query; //filtering or sorting
 
   try {
     let query = supabase
       .from("transactions")
-      .select("*")
+      .select(`
+        *,
+        categories (name),
+        account(name)
+        `)
       .eq("user_id", userId)
-      .order(sortBy, { ascending: order == "asc" });
+      .order("create_at", { ascending: false });
 
-    if (limit) {
-      query = query.limit(parseLimit(limit, 10));
-    }
+    if (startDate) query = query.gte('date', startDate);
+    if (endDate) query = query.lte('date', endDate);
+    if (type) query = query.eq('type', type);
+    if (categoryId) query = query.eq('category_id', categoryId);
+    if (accountId) query = query.eq('account_id', accountId);
+    if (search) query = query.ilike('title', `%${search}%`);
 
     const { data, error } = await query;
 
