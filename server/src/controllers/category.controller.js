@@ -38,6 +38,23 @@ exports.getCategory = async (req, res, next) => {
   }
 };
 
+exports.getCategoryByType = async (req, res, next) => {
+  const userID = req.user.id;
+  const { type } = req.params;
+  try {
+    const { data, error } = await supabase
+      .from("categories")
+      .select("*")
+      .eq("user_id", userID).eq("type", type);
+
+    if (error) throw error;
+    res.status(200).json({ data });
+  } catch (error) {
+    next(error);
+  }
+};
+
+
 exports.updateCategory = async (req, res, next) => {
   const userId = req.user.id;
   const { id } = req.params;
