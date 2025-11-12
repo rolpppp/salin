@@ -26,13 +26,28 @@ export async function renderTransactionsPage(app) {
                         <option value="">ALL</option>
                         ${categories.data.map(c=> `<option value="${c.id}">${c.name}</option>`).join("")}
                     </select>
+                </div>
                 <div class="form-group">
                     <label for="filter-start-date">Start Date</label>
-                    <input type="date" id="filter-start-date" class="form-control">
+                        <input
+                            type="text"
+                            id="filter-start-date"
+                            class="form-control"
+                            placeholder="mm/dd/yyyy"
+                            onfocus="(this.type='date')"
+                            onblur="if(!this.value) this.type='text'"
+                        >
                 </div>
                 <div class="form-group">
                     <label for="filter-end-date">End Date</label>
-                    <input type="date" id="filter-end-date" class="form-control">
+                    <input
+                            type="text"
+                            id="filter-end-date"
+                            class="form-control"
+                            placeholder="mm/dd/yyyy"
+                            onfocus="(this.type='date')"
+                            onblur="if(!this.value) this.type='text'"
+                        >
                 </div>
             </div>
         `;
@@ -41,7 +56,7 @@ export async function renderTransactionsPage(app) {
         app.innerHTML = `
             <div class="page-header">
                 <h1>All Transactions</h1>
-                <a href="#/dashboard">Back to Dashboard</a>
+                <a href="#/dashboard" style="opacity: 0.5">Back to Dashboard</a>
             </div>
             ${filterControlsHTML}
             <div class="card">
@@ -84,7 +99,7 @@ function attachFilterListeners() {
 
         const filtered = allTransactions.filter(t => {
             if (filters.search && !t.title.toLowerCase().includes(filters.search)) return false;
-            if (filters.category && t.category_id !== Number(filters.category)) return false;
+            if (filters.category && t.category_id !== filters.category) return false;
             if (filters.startDate && t.date < filters.startDate) return false;
             if (filters.endDate && t.date > filters.endDate) return false;
             return true;
@@ -104,11 +119,21 @@ function renderTransactionsList(list) {
     container.innerHTML = "";
 
     list.forEach(t => {
+        // Determine the class based on transaction type
+        const typeClass = t.type === "income" ? "income" : "expense";
+
+        // Format amount neatly
+        const formattedAmount = parseFloat(t.amount).toLocaleString("en-PH", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+        });
+
         container.innerHTML += `
             <tr>
                 <td>${t.date}</td>
                 <td>${t.title}</td>
-                <td>${t.amount}</td>
+                <td class="amount ${typeClass}"> ${t.type === "income" ? "+" : "-"}₱${formattedAmount}
+                </td>
             </tr>
         `;
     });

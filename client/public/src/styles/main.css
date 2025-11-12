@@ -340,9 +340,6 @@ body {
 }
 
 .filter-controls .form-group {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-template-columns: repeat(2, 1fr);
     margin-bottom: 0;
 }
 
@@ -371,7 +368,15 @@ body {
     text-transform: uppercase;
 }
 
-.transactions-table .amount {
+.transactions-table td.amount {
     text-align: right;
     font-weight: 700;
+}
+
+.transactions-table td.amount.income {
+    color: var(--secondary-color)
+}
+
+.transactions-table td.amount.expense {
+    color: var(--danger-color)
 }
