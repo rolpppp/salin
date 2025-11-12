@@ -2,7 +2,7 @@ const supabase = require("../config/supabase");
 
 exports.createCategory = async (req, res, next) => {
   const userId = req.user.id;
-  const { name, keywords } = req.body;
+  const { name, type, keywords } = req.body;
 
   if (!name) {
     return res.status(400).json({ error: "Category name is required" });
@@ -11,7 +11,7 @@ exports.createCategory = async (req, res, next) => {
   try {
     const { data, error } = await supabase
       .from("categories")
-      .insert({ user_id: userId, name, keywords: keywords || null })
+      .insert({ user_id: userId, name, type, keywords: keywords || null })
       .select()
       .single();
 
@@ -107,15 +107,14 @@ exports.deleteCategory = async (req, res, next) => {
     }
 
     const { data, error } = await supabase
-      .from("accounts")
+      .from("categories")
       .delete()
       .eq("id", id)
-      .select()
-      .single();
+      .select().single();
 
     if (error) throw error;
 
-    res.status(201).json({ message: "Account deleted successfully" });
+    res.status(200).json({ message: "Category deleted successfully" });
   } catch (error) {
     next(error);
   }
