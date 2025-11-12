@@ -2,7 +2,7 @@ const API_BASE_URL =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1"
     ? "http://localhost:3000/api" // PC browser
-    : "http://192.168.1.62:3000/api"; // backend server
+    : "http://10.12.55.48:3000/api"; // backend server
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -74,7 +74,7 @@ export function getAccounts() {
 }
 
 export function getCategoriesByType(type) {
-  return request(`/categories/type/${type}`, {headers: getAuthHeaders()});
+  return request(`/categories/type/${type}`, {headers: getAuthHeaders() });
 }
 
 export function getCategories() {
@@ -98,5 +98,55 @@ export function createTransaction(transactionData) {
     method: "POST",
     headers: getAuthHeaders(),
     body: JSON.stringify(transactionData)
+  });
+}
+
+// --- Account Endpoints ---
+
+export function createAccount(accountData) {
+  return request("/accounts", {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(accountData)
+  });
+}
+
+export function updateAccount(id, accountData) {
+  return request(`/accounts/${id}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(accountData)
+  });
+}
+
+export function deleteAccount(id) {
+  return request(`/accounts/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders()
+  })
+}
+
+// --- Category Endpoints ---
+
+export function createCategory(categoriesData) {
+  return request("/categories", {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(categoriesData)
+  });
+}
+
+export function updateCategory(id, categoriesData) {
+  return request(`/categories/${id}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(categoriesData)
+  });
+}
+
+export function deleteCategory(id) {
+  return request(`/categories/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders()
   });
 }
