@@ -16,6 +16,16 @@ export async function renderDashboardPage(app) {
     app.innerHTML = `
       <header class="dashboard-header">
         <h1>Hi, ${user.email.split("@")[0]}</h1>
+        <a href="#/accounts" style="
+          margin-right: var(--space-md); 
+          color: var(--text-light-color);
+          font-weight: 500;
+          cursor: pointer;">Accounts</a>
+        <a href="#/categories" style="
+          margin-right: var(--space-md); 
+          color: var(--text-light-color);
+          font-weight: 500;
+          cursor: pointer;">Categories</a>
         <button id="logout-btn" class="logout-btn">Logout</button>
       </header>
 
