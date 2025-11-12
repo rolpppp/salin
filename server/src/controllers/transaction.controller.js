@@ -141,7 +141,7 @@ exports.deleteTransaction = async (req, res, next) => {
 
     res
       .status(200)
-      .json({ message: "Transaction updated successfully", transaction: data });
+      .json({ message: "Transaction deleted successfully"});
   } catch (error) {
     next(error);
   }
