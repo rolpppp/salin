@@ -42,7 +42,10 @@ export async function renderDashboardPage(app) {
       </div>
 
       <div class="card">
-        <h2>Recent Transactions</h2>
+        <div style="display: flex; justify-content: space-between; align-items: center">
+          <h2>Recent Transactions</h2>
+          <a href="#/transactions" style="font-size: var(--font-size-sm); font-weight: 500; opacity: 0.5">View All</a>
+        </div>
         <ul id="recent-transactions-list" class="recent-transactions-list">
         </ul>
       </div>

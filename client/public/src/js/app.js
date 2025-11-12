@@ -1,5 +1,6 @@
 import { renderLoginPage, renderRegisterPage } from "./pages/auth/login.js";
 import { renderDashboardPage } from "./pages/dashboard.js";
+import { renderTransactionsPage } from "./pages/transaction.js";
 
 const app = document.getElementById("app");
 
@@ -28,6 +29,9 @@ function router() {
       break;
     case "#/register":
       renderRegisterPage(app);
+      break;
+    case "#/transactions":
+      renderTransactionsPage(app);
       break;
     default:
       // If logged in and route is unknown, go to dashboard

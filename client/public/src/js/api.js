@@ -2,7 +2,7 @@ const API_BASE_URL =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1"
     ? "http://localhost:3000/api" // PC browser
-    : "https://unaidedly-vehicular-spring.ngrok-free.dev/api"; // backend server
+    : "http://192.168.1.62:3000/api"; // backend server
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -73,8 +73,23 @@ export function getAccounts() {
   return request("/accounts", { headers: getAuthHeaders()});
 }
 
-export function getCategories(type) {
+export function getCategoriesByType(type) {
   return request(`/categories/type/${type}`, {headers: getAuthHeaders()});
+}
+
+export function getCategories() {
+  return request(`/categories`, {headers: getAuthHeaders()});
+}
+
+export function getTransactions(filters = {}) {
+  const token = localStorage.getItem("token");
+  if (!token) throw new Error("No auth token found.");
+
+  const query = new URLSearchParams(filters).toString();
+
+  return request(`/transactions?${query}`, {
+    headers: { "Authorization": `Bearer ${token}`}
+  });
 }
 
 // --- Data Mutation Endpoints ---
