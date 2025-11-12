@@ -380,3 +380,61 @@ body {
 .transactions-table td.amount.expense {
     color: var(--danger-color)
 }
+
+/* --- MANAGEMENT PAGE STYLES --- */
+.management-list {
+    list-style: none;
+    padding: 0;
+}
+
+.management-list-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: var(--space-md);
+    background-color: var(--card-bg-color);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--space-sm);
+    box-shadow: var(--box-shadow);
+}
+
+
+.item-details {
+    display: flex;
+    flex-direction: column;
+}
+
+.item-details .name {
+    font-weight: 500;
+}
+
+.item-details .meta {
+    font-size: var(--font-size-sm);
+    color: var(--text-light-color);
+}
+
+.item-actions button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: var(--space-xs);
+    margin-left: var(--space-sm);
+}
+
+.fab-add-button {
+    position: fixed;
+    bottom: var(--space-lg);
+    right: var(--space-lg);
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: var(--primary-color);
+    color: white;
+    font-size: 2rem;
+    border: none;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
