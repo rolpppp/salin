@@ -9,13 +9,13 @@ app.use(cors()); // Enable CORS for frontend-to-backend communication
 app.use(express.json()); // Parse JSON requests
 
 // API routes - MUST come BEFORE static files
-app.use("/api/auth", require("./_app/routes/auth.routes.js"));
-app.use("/api/transactions", require("./_app/routes/transaction.routes.js"));
-app.use("/api/accounts", require("./_app/routes/account.routes.js"));
-app.use("/api/budget", require("./_app/routes/budget.routes.js"));
-app.use("/api/categories", require("./_app/routes/category.routes.js"));
-app.use("/api/parse", require("./_app/routes/parsing.routes.js"));
-app.use("/api/dashboard", require("./_app/routes/dashboard.routes.js"));
+app.use("/auth", require("./_app/routes/auth.routes.js"));
+app.use("/transactions", require("./_app/routes/transaction.routes.js"));
+app.use("/accounts", require("./_app/routes/account.routes.js"));
+app.use("/budget", require("./_app/routes/budget.routes.js"));
+app.use("/categories", require("./_app/routes/category.routes.js"));
+app.use("/parse", require("./_app/routes/parsing.routes.js"));
+app.use("/dashboard", require("./_app/routes/dashboard.routes.js"));
 
 // Static files - AFTER API routes
 app.use(express.static(path.join(__dirname, '../client/public')));
