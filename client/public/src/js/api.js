@@ -1,7 +1,12 @@
-const API_BASE_URL = "/api";
+const API_BASE_URL = process.env.NODE_ENV === 'production'
+  ? 'https://salin-six.vercel.app'
+  : 'http://localhost:3000';
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
+
+  console.log('🔍 Requesting:', url); 
+  console.log('🔍 API_BASE_URL:', API_BASE_URL); 
 
   options.headers = {
     "Content-Type": "application/json",
