@@ -1,4 +1,5 @@
 const express = require("express");
+const path = require("path");
 const cors = require("cors");
 const os = require("os");
 const app = express();
@@ -8,7 +9,7 @@ const app = express();
 app.use(express.json()); // allows for reading JSON requests
 
 // constructin the path
-app.use(express.static(path.join(__dirname, '../../client/public')));
+app.use(express.static(path.join(__dirname, '../../../client/public')));
 
 // API routes
 app.use("/api/auth", require("./routes/auth.routes.js"));
