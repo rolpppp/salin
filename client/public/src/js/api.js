@@ -5,8 +5,8 @@ const isLocal = window.location.hostname === 'localhost' ||
 
 const API_BASE_URL = isLocal
   ? 'http://localhost:3000/api'
-  : 'https://salin-six.vercel.app/api';
-
+  : '/api';
+  
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
 
