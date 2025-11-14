@@ -1,8 +1,4 @@
-const API_BASE_URL =
-  window.location.hostname === "localhost" ||
-  window.location.hostname === "127.0.0.1"
-    ? "http://localhost:3000/api" // PC browser
-    : "http://10.12.55.48:3000/api"; // backend server
+const API_BASE_URL = "/api";
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;

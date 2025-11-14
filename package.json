@@ -4,11 +4,10 @@
   "description": "A web-based money tracker for college students.",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server/src/index.js",
     "server": "nodemon server/src/index.js",
-    "client": "npx live-server --host=0.0.0.0 client/public",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
-
+    "client": "live-server client/public --proxy=/api:http://localhost:3000/api",
+    "dev": "npm run server & npm run client"
   },
   "repository": {
     "type": "git",
