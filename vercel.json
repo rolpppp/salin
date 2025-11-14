@@ -1,4 +1,3 @@
-
 {
   "version": 2,
   "builds": [
@@ -7,7 +6,7 @@
       "use": "@vercel/node"
     },
     {
-      "src": "client/public/**",
+      "src": "client/public/**/*",
       "use": "@vercel/static"
     }
   ],
@@ -18,7 +17,7 @@
     },
     {
       "src": "/(.*)",
-      "dest": "/client/public/$1"
+      "dest": "/client/public/index.html"
     }
   ]
 }

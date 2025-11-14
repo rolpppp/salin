@@ -15,13 +15,13 @@ app.use("/api/categories", require("./_app/routes/category.routes.js"));
 app.use("/api/parse", require("./_app/routes/parsing.routes.js"));
 app.use("/api/dashboard", require("./_app/routes/dashboard.routes.js"));
 
-// Static files
-app.use(express.static(path.join(__dirname, '../client/public')));
+// // Static files
+// app.use(express.static(path.join(__dirname, '../client/public')));
 
-// Catch-all for SPA
-app.get("*", (req, res) => {
-  if (req.path.startsWith("/api")) return; 
-  res.sendFile(path.resolve(__dirname, '../client/public/index.html'));
-});
+// // Catch-all for SPA
+// app.get("*", (req, res) => {
+//   if (req.path.startsWith("/api")) return; 
+//   res.sendFile(path.resolve(__dirname, '../client/public/index.html'));
+// });
 
 module.exports = app;
