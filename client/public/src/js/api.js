@@ -1,6 +1,11 @@
-const API_BASE_URL = process.env.NODE_ENV === 'production'
-  ? 'https://salin-six.vercel.app'
-  : 'http://localhost:3000';
+// Detect if we're running locally or in production
+const isLocal = window.location.hostname === 'localhost' || 
+                window.location.hostname === '127.0.0.1' ||
+                window.location.hostname.includes('192.168');
+
+const API_BASE_URL = isLocal
+  ? 'http://localhost:3000/api'
+  : 'https://salin-six.vercel.app/api';
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;

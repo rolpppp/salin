@@ -4,10 +4,6 @@
     {
       "src": "api/index.js",
       "use": "@vercel/node"
-    },
-    {
-      "src": "client/public/**",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
@@ -16,8 +12,13 @@
       "dest": "/api/index.js"
     },
     {
+      "src": "/src/(.*)",
+      "dest": "/client/public/src/$1"
+    },
+    {
       "src": "/(.*)",
       "dest": "/client/public/$1"
     }
-  ]
+  ],
+  "outputDirectory": "client/public"
 }
