@@ -21,7 +21,7 @@ app.use("/api/parse", require("./routes/parsing.routes.js"));
 app.use("/api/dashboard", require("./routes/dashboard.routes.js"));
 
 app.get('*', (req, res) => {
-  res.sendFile(path.resolve(__dirname, '../../../client/public', 'index.html'));
+  res.sendFile(path.resolve(__dirname, '../../client/public', 'index.html'));
 });
 
 // simple error-handling middleware
