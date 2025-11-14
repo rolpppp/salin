@@ -2,11 +2,11 @@
   "name": "salin",
   "version": "1.0.0",
   "description": "A web-based money tracker for college students.",
-  "main": "index.js",
+  "main": "api/index.js",
   "scripts": {
-    "start": "node server/src/index.js",
-    "server": "nodemon server/src/index.js",
-    "client": "live-server client/public --proxy=/api:http://localhost:3000/api",
+    "start": "node api/index.js",
+    "server": "nodemon api/index.js",
+    "client": "live-server client/public --proxy=/api:http://localhost:3000",
     "dev": "npm run server & npm run client"
   },
   "repository": {
