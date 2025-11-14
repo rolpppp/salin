@@ -5,10 +5,10 @@ const os = require("os");
 const app = express();
 
 // Middleware
-// app.use(cors()); // frontend-to-backend communication
-app.use(express.json()); // allows for reading JSON requests
+app.use(cors()); // Enable CORS for frontend-to-backend communication
+app.use(express.json()); // Parse JSON requests
 
-// API routes
+// API routes - MUST come BEFORE static files
 app.use("/api/auth", require("./_app/routes/auth.routes.js"));
 app.use("/api/transactions", require("./_app/routes/transaction.routes.js"));
 app.use("/api/accounts", require("./_app/routes/account.routes.js"));
@@ -17,28 +17,33 @@ app.use("/api/categories", require("./_app/routes/category.routes.js"));
 app.use("/api/parse", require("./_app/routes/parsing.routes.js"));
 app.use("/api/dashboard", require("./_app/routes/dashboard.routes.js"));
 
-// static file
+// Static files - AFTER API routes
 app.use(express.static(path.join(__dirname, '../client/public')));
+
+// Catch-all route - MUST be LAST and only for non-API routes
 app.get('*', (req, res) => {
+  // Don't serve HTML for API routes
+  if (req.path.startsWith('/api')) {
+    return res.status(404).json({ error: 'API endpoint not found' });
+  }
   res.sendFile(path.resolve(__dirname, '../client/public', 'index.html'));
 });
 
-// simple error-handling middleware
+// Error-handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
     error: "Something went wrong!",
-    details: err.message, // This gives you the specific error
+    details: err.message,
     stack: process.env.NODE_ENV === "development" ? err.stack : undefined,
   });
 });
 
 const PORT = process.env.PORT || 3000;
 
-// this will only listed in a non-vercel deployment
+// Only listen in non-Vercel deployment
 if (process.env.VERCEL_ENV !== 'production') {
   app.listen(PORT, "0.0.0.0", () => {
-    // The os-based IP logging is great for local dev but not needed for Vercel.
     const networkInterfaces = os.networkInterfaces();
     const ips = [];
     for (const name of Object.keys(networkInterfaces)) {
@@ -55,4 +60,4 @@ if (process.env.VERCEL_ENV !== 'production') {
   });
 }
 
-module.exports = app();
+module.exports = app;
