@@ -37,11 +37,11 @@ exports.getDashboardData = async (req, res, next) => {
       // getting the budget for current month
       supabase
         .from("budgets")
-        .select("amount")
+        .select("id, amount")
         .eq("user_id", userId)
         .eq("month", month)
         .eq("year", year)
-        .single(),
+        .maybeSingle(),
 
       // total spent
       supabase
@@ -72,6 +72,7 @@ exports.getDashboardData = async (req, res, next) => {
       totalBalance: totalBalance,
       recentTransactions: recentTransactionsData.data,
       budget: {
+        id: budgetData.data ? budgetData.data.id : null,
         amount: budgetData.data ? budgetData.data.amount : 0,
         spent: totalSpent,
       },

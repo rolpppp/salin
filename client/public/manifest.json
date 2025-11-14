@@ -1,0 +1,15 @@
+{
+  "name": "salin: A Web-based Money Tracker",
+  "short_name": "salin",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#4F46E5",
+  "icons": [
+    {
+      "src": "/assets/icons/salin.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}

@@ -19,6 +19,7 @@
 
   /* Typography */
   --font-family: "Inter", sans-serif; /* Add Inter from Google Fonts for a modern look */
+  --font-size-ssm: 0.870rem;
   --font-size-sm: 0.875rem;
   --font-size-base: 1rem;
   --font-size-lg: 1.125rem;

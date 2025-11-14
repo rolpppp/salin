@@ -1,18 +1,21 @@
 import { getDashboardData } from "../api.js";
 import { openTransactionForm } from "../components/TransactionForm.js";
+import { openBudgetForm } from "../components/BudgetForm.js";
+
+let currentDashboardData = {};
 
 export async function renderDashboardPage(app) {
   try {
     const data = await getDashboardData();
-    console.log(data.budget.spent)
-    console.log("hello");
+    currentDashboardData = data;
+    console.log(data.budget.id);
     const user = JSON.parse(localStorage.getItem("user"));
     console.log("Username: ", user);
     const budgetPercent =
       data.budget.amount > 0
         ? (data.budget.spent / data.budget.amount) * 100
         : 0;
-
+      
     app.innerHTML = `
       <header class="dashboard-header">
         <h1>Hi, ${user.email.split("@")[0]}</h1>
@@ -34,7 +37,7 @@ export async function renderDashboardPage(app) {
         <p class="balance">${data.totalBalance.toFixed(2)}</p>
       </div>
 
-      <div class="card budget-card">
+      <div id="budget-card" class="card budget-card" style="cursor: pointer;">
         <div class="budget-info">
           <span>Monthly Budget</span>
           <span>₱${data.budget.spent.toFixed(2)} / ₱${parseFloat(
@@ -44,6 +47,12 @@ export async function renderDashboardPage(app) {
         <div class="budget-progress">
           <div class="budget-progress-bar" style="width: ${budgetPercent}%"></div>
         </div>
+      </div>
+
+      <div class="card">
+        <h2>Quick Add via Paste</h2>
+        <textarea id="paste-area" class="form-control" rows="3" placeholder="e.g., Lunch at narnia ₱55.00 and transpo 20 pesos yesterday"></textarea>
+        <button id="parse-btn" class="btn" style="width: 100%; margin-top: var(--space-sm);">Parse Note</button>
       </div>
 
       <div class="quick-actions">
@@ -114,4 +123,9 @@ function attachDashboardListeners() {
   addIncomeBtn.addEventListener("click", () => {
     openTransactionForm("income")
   });
+
+  const budgetCard = document.getElementById('budget-card');
+    budgetCard.addEventListener("click", () => {
+        openBudgetForm(currentDashboardData.budget);
+    });
 }

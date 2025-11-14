@@ -78,7 +78,11 @@ export function getCategoriesByType(type) {
 }
 
 export function getCategories() {
-  return request(`/categories`, {headers: getAuthHeaders()});
+  return request("/categories", {headers: getAuthHeaders()});
+}
+
+export function getCurrentBudget() {
+  return request("/budget/current", {headers: getAuthHeaders()});
 }
 
 export function getTransactions(filters = {}) {
@@ -148,5 +152,33 @@ export function deleteCategory(id) {
   return request(`/categories/${id}`, {
     method: "DELETE",
     headers: getAuthHeaders()
+  });
+}
+
+// ---Budget Endpoints ---
+
+export function setBudget(budgetData) {
+  return request("/budget", {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(budgetData)
+  });
+}
+
+export function updateBudget(id, budgetData) {
+  return request(`/budget/${id}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(budgetData)
+  });
+}
+
+// --- Parsing Endpoint ---
+
+export function parseText(text) {
+  return request("/parse", {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({text})
   });
 }

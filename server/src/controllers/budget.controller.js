@@ -35,14 +35,17 @@ exports.getCurrentBudget = async (req, res, next) => {
   const year = now.getFullYear();
 
   try {
-    const { data: budgetData, error } = await supabase
-      .from("budgets")
-      .select("amount")
-      .eq("user_id", userID)
-      .eq("month", month)
-      .eq("year", year);
+    const { data: budgetData, error } = await 
+      supabase
+        .from("budgets")
+        .select("id, amount")
+        .eq("user_id", userID)
+        .eq("month", month)
+        .eq("year", year)
+        .single();
 
-    if (error) throw error;
+    // Handle case when no budget exists (PGRST116 error)
+    if (error && error.code !== "PGRST116") throw error;
 
     // calculate total spent
     const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
@@ -50,6 +53,7 @@ exports.getCurrentBudget = async (req, res, next) => {
       .from("transactions")
       .select("amount")
       .eq("user_id", userID)
+      .eq("type", "expense")
       .gte("date", startDate)
       .lte("date", now.toISOString().split("T")[0]);
 
@@ -61,7 +65,8 @@ exports.getCurrentBudget = async (req, res, next) => {
     );
 
     res.status(200).json({
-      amount: budgetData ? budgetData.amount : 0,
+      id: budgetData.data.id,
+      amount: budgetData.data ? budgetData.data.amount : 0,
       spent: totalSpent,
       month,
       year,
