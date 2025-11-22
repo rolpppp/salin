@@ -17,9 +17,26 @@ exports.registerUser = async (req, res, next) => {
     });
     if (insertError) throw insertError;
 
+    // Generate JWT token for the new user
+    const payload = {
+      id: newUser.user.id,
+      email: newUser.user.email,
+    };
+
+    if (!process.env.JWT_SECRET) {
+      return res
+        .status(500)
+        .json({ error: "Authentication not configured." });
+    }
+
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
     res.status(201).json({
       message: "User created successfully.",
-      user: { id: newUser.id, email: newUser.email },
+      token,
+      user: { id: newUser.user.id, email: newUser.user.email },
     });
   } catch (error) {
     next(error); // pass error

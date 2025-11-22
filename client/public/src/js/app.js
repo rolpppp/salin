@@ -15,6 +15,7 @@ if ("serviceWorker" in navigator) {
   });
 }
 
+// imports for rendering different application pages
 import { renderAccountsPage } from "./pages/account.js";
 import { renderLoginPage, renderRegisterPage } from "./pages/auth/login.js";
 import { renderCategoriesPage } from "./pages/categories.js";
@@ -22,6 +23,7 @@ import { renderDashboardPage } from "./pages/dashboard.js";
 import { renderTransactionsPage } from "./pages/transaction.js";
 import { renderForgotPasswordPage } from "./pages/auth/forgotPassword.js";
 import { renderResetPasswordPage } from "./pages/auth/resetPassword.js";
+import { renderOnboardingPage } from "./pages/onboarding.js";
 
 const app = document.getElementById("app");
 
@@ -88,6 +90,9 @@ function router() {
       break;
     case "#/reset-password":
       renderResetPasswordPage(app);
+      break;
+    case "#/onboarding":
+      renderOnboardingPage(app);
       break;
     default:
       // if logged in and route is unknown, go to dashboard

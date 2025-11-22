@@ -11,6 +11,7 @@ export async function renderDashboardPage(app) {
     const data = await getDashboardData();
     currentDashboardData = data;
     const user = JSON.parse(localStorage.getItem("user"));
+    const displayName = user.name || user.email.split("@")[0];
     const budgetPercent =
       data.budget.amount > 0
         ? (data.budget.spent / data.budget.amount) * 100
@@ -18,7 +19,7 @@ export async function renderDashboardPage(app) {
       
     app.innerHTML = `
       <header class="dashboard-header">
-        <h1>Hi, ${user.email.split("@")[0]}</h1>
+        <h1>Hi, ${displayName}!</h1>
         <a href="#/accounts" style="
           margin-right: var(--space-md); 
           color: var(--text-light-color);
