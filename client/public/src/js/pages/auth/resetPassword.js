@@ -35,20 +35,20 @@ export function renderResetPasswordPage(app) {
 function attachPasswordToggle() {
   const passwordInput = document.getElementById("new-password");
   const toggleIcon = document.querySelector(".password-toggle-icon");
-  
+
   if (toggleIcon && passwordInput) {
     toggleIcon.addEventListener("click", () => {
       const eyeOpen = toggleIcon.querySelectorAll(".eye-open");
       const eyeClosed = toggleIcon.querySelectorAll(".eye-closed");
-      
+
       if (passwordInput.type === "password") {
         passwordInput.type = "text";
-        eyeOpen.forEach(el => el.style.display = "none");
-        eyeClosed.forEach(el => el.style.display = "block");
+        eyeOpen.forEach((el) => (el.style.display = "none"));
+        eyeClosed.forEach((el) => (el.style.display = "block"));
       } else {
         passwordInput.type = "password";
-        eyeOpen.forEach(el => el.style.display = "block");
-        eyeClosed.forEach(el => el.style.display = "none");
+        eyeOpen.forEach((el) => (el.style.display = "block"));
+        eyeClosed.forEach((el) => (el.style.display = "none"));
       }
     });
   }
@@ -70,7 +70,6 @@ function extractTokenFromURL() {
     if (token && type === "recovery") {
       recoveryToken = token;
       messageArea.innerHTML = `<p style="color: var(--secondary-color);">Ready to reset your password. Enter a new password below.</p>`;
-
     } else {
       messageArea.innerHTML = `<p class="error-message" style="display: block;">Invalid reset link. Please request a new one.</p>`;
     }
@@ -85,18 +84,18 @@ function attachResetFormListener() {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-    
+
     const submitBtn = form.querySelector('button[type="submit"]');
-    
+
     // Show loading state
-    submitBtn.classList.add('btn-loading');
+    submitBtn.classList.add("btn-loading");
     submitBtn.disabled = true;
-    
+
     const newPassword = document.getElementById("new-password").value;
 
     if (!recoveryToken) {
       messageArea.innerHTML = `<p class="error-message" style="display: block;">No valid recovery token. Please request a new reset link.</p>`;
-      submitBtn.classList.remove('btn-loading');
+      submitBtn.classList.remove("btn-loading");
       submitBtn.disabled = false;
       return;
     }
@@ -113,9 +112,9 @@ function attachResetFormListener() {
       messageArea.innerHTML = `<p class="error-message" style="display: block;">${
         error.message || "Unable to reset password. Please try again."
       }</p>`;
-      
+
       // Reset button state on error
-      submitBtn.classList.remove('btn-loading');
+      submitBtn.classList.remove("btn-loading");
       submitBtn.disabled = false;
     }
   });

@@ -3,7 +3,7 @@ const express = require("express");
 const path = require("path");
 const cors = require("cors");
 const os = require("os");
-const serverless = require('serverless-http');
+const serverless = require("serverless-http");
 const app = express();
 
 // middleware
@@ -30,17 +30,19 @@ app.use((err, req, res, next) => {
 });
 
 // Start the server locally if not in serverless environment
-if (process.env.NODE_ENV !== 'production' && !process.env.LAMBDA_TASK_ROOT) {
+if (process.env.NODE_ENV !== "production" && !process.env.LAMBDA_TASK_ROOT) {
   const PORT = process.env.PORT || 3000;
   app.listen(PORT, () => {
     console.log(`🚀 Server running on http://localhost:${PORT}`);
-    
+
     // Get local IP addresses
     const interfaces = os.networkInterfaces();
-    Object.keys(interfaces).forEach(interfaceName => {
-      interfaces[interfaceName].forEach(iface => {
-        if (iface.family === 'IPv4' && !iface.internal) {
-          console.log(`📱 Server accessible at http://${iface.address}:${PORT}`);
+    Object.keys(interfaces).forEach((interfaceName) => {
+      interfaces[interfaceName].forEach((iface) => {
+        if (iface.family === "IPv4" && !iface.internal) {
+          console.log(
+            `📱 Server accessible at http://${iface.address}:${PORT}`
+          );
         }
       });
     });

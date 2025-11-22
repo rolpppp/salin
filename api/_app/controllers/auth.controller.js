@@ -24,9 +24,7 @@ exports.registerUser = async (req, res, next) => {
     };
 
     if (!process.env.JWT_SECRET) {
-      return res
-        .status(500)
-        .json({ error: "Authentication not configured." });
+      return res.status(500).json({ error: "Authentication not configured." });
     }
 
     const token = jwt.sign(payload, process.env.JWT_SECRET, {

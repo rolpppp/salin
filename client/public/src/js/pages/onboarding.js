@@ -4,7 +4,7 @@ import { getUserID, updateAccount, createAccount } from "../api.js";
 
 // renders the onboarding page, which collects user details and initial account information
 export function renderOnboardingPage(app) {
-    app.innerHTML = `
+  app.innerHTML = `
         <div class="auth-container">
             <div class="card auth-card">
                 <h1>Welcome to <span style="color: var(--primary-color);">salin</span>!</h1>
@@ -49,7 +49,7 @@ export function renderOnboardingPage(app) {
         </div>
     `;
 
-    attachOnboardingListeners();
+  attachOnboardingListeners();
 }
 
 // attaches event listeners to the onboarding form

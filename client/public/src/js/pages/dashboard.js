@@ -16,7 +16,7 @@ export async function renderDashboardPage(app) {
       data.budget.amount > 0
         ? (data.budget.spent / data.budget.amount) * 100
         : 0;
-      
+
     app.innerHTML = `
       <header class="dashboard-header">
         <h1>Hi, ${displayName}!</h1>
@@ -72,7 +72,7 @@ export async function renderDashboardPage(app) {
     `;
 
     window.addEventListener("transactionsUpdated", () => {
-      renderDashboardPage(app)
+      renderDashboardPage(app);
     });
 
     renderRecentTransactions(data.recentTransactions);
@@ -93,12 +93,14 @@ function renderRecentTransactions(transactions) {
         <button id="empty-add-expense-btn" class="btn btn-primary">Add Transaction</button>
       </div>
     `;
-    
+
     // Add click listener for empty state button
     setTimeout(() => {
       const emptyBtn = document.getElementById("empty-add-expense-btn");
       if (emptyBtn) {
-        emptyBtn.addEventListener("click", () => openTransactionForm("expense"));
+        emptyBtn.addEventListener("click", () =>
+          openTransactionForm("expense")
+        );
       }
     }, 0);
     return;
@@ -130,24 +132,24 @@ function attachDashboardListeners() {
 
   const addExpenseBtn = document.getElementById("add-expense-btn");
   addExpenseBtn.addEventListener("click", () => {
-    openTransactionForm("expense")
+    openTransactionForm("expense");
   });
 
   const addIncomeBtn = document.getElementById("add-income-btn");
   addIncomeBtn.addEventListener("click", () => {
-    openTransactionForm("income")
+    openTransactionForm("income");
   });
 
-  const budgetCard = document.getElementById('budget-card');
-    budgetCard.addEventListener("click", () => {
-        openBudgetForm(currentDashboardData.budget);
-    });
+  const budgetCard = document.getElementById("budget-card");
+  budgetCard.addEventListener("click", () => {
+    openBudgetForm(currentDashboardData.budget);
+  });
 
-  const parseBtn = document.getElementById('parse-btn');
-    parseBtn.addEventListener('click', () => {
-        const text = document.getElementById('paste-area').value;
-        if (text.trim()) {
-            openParseReviewModal(text);
-        }
-    });
+  const parseBtn = document.getElementById("parse-btn");
+  parseBtn.addEventListener("click", () => {
+    const text = document.getElementById("paste-area").value;
+    if (text.trim()) {
+      openParseReviewModal(text);
+    }
+  });
 }

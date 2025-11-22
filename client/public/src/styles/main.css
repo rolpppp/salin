@@ -41,8 +41,12 @@ body {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .btn-loading {
@@ -81,8 +85,12 @@ body {
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* ==========================================================================
@@ -334,27 +342,27 @@ select.form-control {
 }
 
 .form-group .password-toggle {
-    display: flex;
-    align-items: center;
-    margin-top: var(--space-sm);
+  display: flex;
+  align-items: center;
+  margin-top: var(--space-sm);
 }
 
 .form-group .password-toggle input {
-    margin-right: var(--space-xs);
+  margin-right: var(--space-xs);
 }
 
 .form-group.password-group {
-    position: relative;
+  position: relative;
 }
 
 .password-toggle-icon {
-    position: absolute;
-    top: 70%;
-    right: var(--space-md);
-    transform: translateY(-50%);
-    cursor: pointer;
-    color: var(--text-light-color);
-    user-select: none;
+  position: absolute;
+  top: 70%;
+  right: var(--space-md);
+  transform: translateY(-50%);
+  cursor: pointer;
+  color: var(--text-light-color);
+  user-select: none;
 }
 
 .auth-card .btn {
@@ -433,7 +441,11 @@ select.form-control {
 
 .balance-card {
   text-align: center;
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-dark-color) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--primary-color) 0%,
+    var(--primary-dark-color) 100%
+  );
   color: white;
   border: none;
 }
@@ -490,7 +502,11 @@ select.form-control {
 
 .budget-progress-bar {
   height: 100%;
-  background: linear-gradient(90deg, var(--primary-color), var(--primary-light-color));
+  background: linear-gradient(
+    90deg,
+    var(--primary-color),
+    var(--primary-light-color)
+  );
   border-radius: var(--border-radius-full);
   transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -657,8 +673,12 @@ select.form-control {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slideUp {
@@ -766,22 +786,54 @@ select.form-control {
 /* ==========================================================================
    UTILITIES
    ========================================================================== */
-.text-center { text-align: center; }
-.text-right { text-align: right; }
-.text-sm { font-size: var(--font-size-sm); }
-.text-lg { font-size: var(--font-size-lg); }
-.text-xl { font-size: var(--font-size-xl); }
-.font-medium { font-weight: var(--font-weight-medium); }
-.font-semibold { font-weight: var(--font-weight-semibold); }
-.font-bold { font-weight: var(--font-weight-bold); }
-.mt-0 { margin-top: 0; }
-.mt-sm { margin-top: var(--space-sm); }
-.mt-md { margin-top: var(--space-md); }
-.mt-lg { margin-top: var(--space-lg); }
-.mb-0 { margin-bottom: 0; }
-.mb-sm { margin-bottom: var(--space-sm); }
-.mb-md { margin-bottom: var(--space-md); }
-.mb-lg { margin-bottom: var(--space-lg); }
+.text-center {
+  text-align: center;
+}
+.text-right {
+  text-align: right;
+}
+.text-sm {
+  font-size: var(--font-size-sm);
+}
+.text-lg {
+  font-size: var(--font-size-lg);
+}
+.text-xl {
+  font-size: var(--font-size-xl);
+}
+.font-medium {
+  font-weight: var(--font-weight-medium);
+}
+.font-semibold {
+  font-weight: var(--font-weight-semibold);
+}
+.font-bold {
+  font-weight: var(--font-weight-bold);
+}
+.mt-0 {
+  margin-top: 0;
+}
+.mt-sm {
+  margin-top: var(--space-sm);
+}
+.mt-md {
+  margin-top: var(--space-md);
+}
+.mt-lg {
+  margin-top: var(--space-lg);
+}
+.mb-0 {
+  margin-bottom: 0;
+}
+.mb-sm {
+  margin-bottom: var(--space-sm);
+}
+.mb-md {
+  margin-bottom: var(--space-md);
+}
+.mb-lg {
+  margin-bottom: var(--space-lg);
+}
 
 /* ==========================================================================
    MANAGEMENT PAGES (Accounts & Categories)

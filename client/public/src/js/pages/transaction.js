@@ -1,22 +1,27 @@
 import { renderErrorPage } from "../app.js";
 import { showToast } from "../components/Toast.js";
-import { getTransactions, getCategories, getAccounts, deleteTransaction} from "../api.js";
+import {
+  getTransactions,
+  getCategories,
+  getAccounts,
+  deleteTransaction,
+} from "../api.js";
 
 let allTransactions = []; //store full list for filtering
 let categories = [];
 let accounts = [];
 
 export async function renderTransactionsPage(app) {
-    app.innerHTML = '<div class="loading-spinner"></div>';
+  app.innerHTML = '<div class="loading-spinner"></div>';
 
-    try{
-        [allTransactions, categories, accounts] = await Promise.all([
-            getTransactions(),
-            getCategories(),
-            getAccounts()
-        ]);
+  try {
+    [allTransactions, categories, accounts] = await Promise.all([
+      getTransactions(),
+      getCategories(),
+      getAccounts(),
+    ]);
 
-        const filterControlsHTML = `
+    const filterControlsHTML = `
             <div class="filter-controls card">
                 <div class="form-group">
                     <label for="filter-search">Search</label>
@@ -26,7 +31,11 @@ export async function renderTransactionsPage(app) {
                     <label for="filter-category">Category</label>
                     <select id="filter-category" class="form-control">
                         <option value="">ALL</option>
-                        ${categories.data.map(c=> `<option value="${c.id}">${c.name}</option>`).join("")}
+                        ${categories.data
+                          .map(
+                            (c) => `<option value="${c.id}">${c.name}</option>`
+                          )
+                          .join("")}
                     </select>
                 </div>
                 <div class="form-group">
@@ -54,8 +63,7 @@ export async function renderTransactionsPage(app) {
             </div>
         `;
 
-
-        app.innerHTML = `
+    app.innerHTML = `
             <div class="page-header">
                 <h1>All Transactions</h1>
                 <a href="#/dashboard">Back to Dashboard</a>
@@ -80,80 +88,89 @@ export async function renderTransactionsPage(app) {
             </div>
         `;
 
-        renderTransactionsList(allTransactions);
-        attachFilterListeners();
-    } catch (error) {
-        renderErrorPage(app, error.message);
-    }
+    renderTransactionsList(allTransactions);
+    attachFilterListeners();
+  } catch (error) {
+    renderErrorPage(app, error.message);
+  }
 }
 
 function attachFilterListeners() {
-    const searchInput = document.getElementById("filter-search");
-    const categorySelect = document.getElementById("filter-category");
-    const startDateInput = document.getElementById('filter-start-date');
-    const endDateInput = document.getElementById('filter-end-date');
-    const tableBody = document.getElementById('transactions-list-container');
+  const searchInput = document.getElementById("filter-search");
+  const categorySelect = document.getElementById("filter-category");
+  const startDateInput = document.getElementById("filter-start-date");
+  const endDateInput = document.getElementById("filter-end-date");
+  const tableBody = document.getElementById("transactions-list-container");
 
-    tableBody.addEventListener('click', async (e) => {
-        const target = e.target;
-        const row = target.closest('tr');
-        if (!row) return;
+  tableBody.addEventListener("click", async (e) => {
+    const target = e.target;
+    const row = target.closest("tr");
+    if (!row) return;
 
-        const transactionId = row.dataset.id;
-        
-        // --- DELETE LOGIC ---
-        if (target.classList.contains('delete-btn')) {
-            if (confirm('Are you sure you want to delete this transaction? This will also update your account balance.')) {
-                try {
-                    await deleteTransaction(transactionId);
-                    showToast('Transaction deleted successfully');
-                    renderTransactionsPage(document.getElementById('app'));
-                } catch (error) {
-                    showToast(error.message, 'error');
-                }
-            }
+    const transactionId = row.dataset.id;
+
+    // --- DELETE LOGIC ---
+    if (target.classList.contains("delete-btn")) {
+      if (
+        confirm(
+          "Are you sure you want to delete this transaction? This will also update your account balance."
+        )
+      ) {
+        try {
+          await deleteTransaction(transactionId);
+          showToast("Transaction deleted successfully");
+          renderTransactionsPage(document.getElementById("app"));
+        } catch (error) {
+          showToast(error.message, "error");
         }
+      }
+    }
 
-        // --- EDIT LOGIC ---
-        if (target.classList.contains('edit-btn')) {
-            const transactionToEdit = allTransactions.find(t => t.id === transactionId);
-            if (transactionToEdit) {
-                const { openTransactionForm } = await import('../components/TransactionForm.js');
-                openTransactionForm(transactionToEdit.type, transactionToEdit);
-            }
-        }
-    });
-    const applyFilters = () => {
-        const filters = {
-            search: searchInput.value.toLowerCase(),
-            category: categorySelect.value,
-            startDate: startDateInput.value,
-            endDate: endDateInput.value
-        };
-
-        const filtered = allTransactions.filter(t => {
-            if (filters.search && !t.title.toLowerCase().includes(filters.search)) return false;
-            if (filters.category && t.category_id !== filters.category) return false;
-            if (filters.startDate && t.date < filters.startDate) return false;
-            if (filters.endDate && t.date > filters.endDate) return false;
-            return true;
-        });
-        
-        renderTransactionsList(filtered);
+    // --- EDIT LOGIC ---
+    if (target.classList.contains("edit-btn")) {
+      const transactionToEdit = allTransactions.find(
+        (t) => t.id === transactionId
+      );
+      if (transactionToEdit) {
+        const { openTransactionForm } = await import(
+          "../components/TransactionForm.js"
+        );
+        openTransactionForm(transactionToEdit.type, transactionToEdit);
+      }
+    }
+  });
+  const applyFilters = () => {
+    const filters = {
+      search: searchInput.value.toLowerCase(),
+      category: categorySelect.value,
+      startDate: startDateInput.value,
+      endDate: endDateInput.value,
     };
 
-    [searchInput, categorySelect, startDateInput, endDateInput].forEach(el => {
-        el.addEventListener('change', applyFilters);
-        if (el.type === 'text') el.addEventListener('keyup', applyFilters);
+    const filtered = allTransactions.filter((t) => {
+      if (filters.search && !t.title.toLowerCase().includes(filters.search))
+        return false;
+      if (filters.category && t.category_id !== filters.category) return false;
+      if (filters.startDate && t.date < filters.startDate) return false;
+      if (filters.endDate && t.date > filters.endDate) return false;
+      return true;
     });
+
+    renderTransactionsList(filtered);
+  };
+
+  [searchInput, categorySelect, startDateInput, endDateInput].forEach((el) => {
+    el.addEventListener("change", applyFilters);
+    if (el.type === "text") el.addEventListener("keyup", applyFilters);
+  });
 }
 
 function renderTransactionsList(list) {
-    const container = document.getElementById("transactions-list-container");
-    container.innerHTML = "";
+  const container = document.getElementById("transactions-list-container");
+  container.innerHTML = "";
 
-    if (list.length === 0) {
-        container.innerHTML = `
+  if (list.length === 0) {
+    container.innerHTML = `
             <tr>
                 <td colspan="4" style="border: none; padding: 0;">
                     <div class="empty-state">
@@ -164,24 +181,26 @@ function renderTransactionsList(list) {
                 </td>
             </tr>
         `;
-        return;
-    }
+    return;
+  }
 
-    list.forEach(t => {
-        // determine the class based on transaction type
-        const typeClass = t.type === "income" ? "income" : "expense";
+  list.forEach((t) => {
+    // determine the class based on transaction type
+    const typeClass = t.type === "income" ? "income" : "expense";
 
-        // format amount neatly
-        const formattedAmount = parseFloat(t.amount).toLocaleString("en-PH", {
-        minimumFractionDigits: 2,
-        maximumFractionDigits: 2
-        });
+    // format amount neatly
+    const formattedAmount = parseFloat(t.amount).toLocaleString("en-PH", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
 
-        container.innerHTML += `
+    container.innerHTML += `
             <tr data-id="${t.id}">
                 <td>${t.date}</td>
                 <td>${t.title}</td>
-                <td class="amount ${typeClass}"> ${t.type === "income" ? "+" : "-"}₱${formattedAmount}
+                <td class="amount ${typeClass}"> ${
+      t.type === "income" ? "+" : "-"
+    }₱${formattedAmount}
                 </td>
                 <td>
                 <div class="item-actions">
@@ -203,5 +222,5 @@ function renderTransactionsList(list) {
             </td>
             </tr>
         `;
-    });
+  });
 }
