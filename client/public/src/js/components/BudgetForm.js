@@ -1,6 +1,7 @@
 import { showModal, hideModal } from "./Modal.js";
 import { setBudget, updateBudget } from "../api.js";
 import { getCurrentBudget } from "../api.js";
+import { showToast } from "./Toast.js";
 
 export function openBudgetForm(currentBudget = {}) {
   const now = new Date();
@@ -46,16 +47,17 @@ export function openBudgetForm(currentBudget = {}) {
       if (currentBudget.id) {
         // Budget exists, update it
         await updateBudget(currentBudget.id, { amount: budgetData.amount });
+        showToast(`Budget updated to ₱${budgetData.amount.toFixed(2)}`);
       } else {
         // No budget exists, create new one
         await setBudget(budgetData);
+        showToast(`Budget set to ₱${budgetData.amount.toFixed(2)}`);
       }
 
       hideModal();
-      alert(`Budget set to ₱${budgetData.amount.toFixed(2)}`);
       window.dispatchEvent(new CustomEvent("transactionsUpdated"));
     } catch (error) {
-      alert(error.message);
+      showToast(error.message, 'error');
 
       // Reset button state on error
       submitBtn.classList.remove("btn-loading");
