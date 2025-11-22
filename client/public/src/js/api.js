@@ -13,8 +13,6 @@ const API_BASE_URL = isLocal
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
 
-  
-
   options.headers = {
     "Content-Type": "application/json",
     ...options.headers,
@@ -26,7 +24,7 @@ async function request(endpoint, options = {}) {
 
     if (!response.ok) {
       throw new Error(
-        data.error || data.details || "An unknown error occured."
+        data.error || data.details || "An unknown error occured.",
       );
     }
 

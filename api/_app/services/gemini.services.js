@@ -40,7 +40,7 @@ async function parseTransactions(text, categories) {
   } catch (error) {
     console.error("Gemini API error: ", error);
     throw new Error(
-      "Failed to parse text with AI. The model may have returned an invalid format."
+      "Failed to parse text with AI. The model may have returned an invalid format.",
     );
   }
 }

@@ -17,8 +17,8 @@ export async function openTransactionForm(type, transactionToEdit = null) {
   const title = isEdit
     ? "Edit Transaction"
     : type === "expense"
-    ? "Add New Expense"
-    : "Add New Income";
+      ? "Add New Expense"
+      : "Add New Income";
 
   const formContentHTML = `
         <form id="transaction-form">
@@ -51,7 +51,7 @@ export async function openTransactionForm(type, transactionToEdit = null) {
                             isEdit && c.id === transactionToEdit.category_id
                               ? "selected"
                               : ""
-                          }>${c.name}</option>`
+                          }>${c.name}</option>`,
                       )
                       .join("")}
                 </select>
@@ -69,8 +69,8 @@ export async function openTransactionForm(type, transactionToEdit = null) {
                              ? "selected"
                              : ""
                          }>${a.name} (₱${parseFloat(a.balance).toFixed(
-                           2
-                         )})</option>`
+                           2,
+                         )})</option>`,
                      )
                      .join("")}
                 </select>

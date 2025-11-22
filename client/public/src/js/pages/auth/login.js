@@ -33,7 +33,9 @@ function renderAuthForm(isLogin) {
               </svg>
             </span>
           </div>
-          ${!isLogin ? `
+          ${
+            !isLogin
+              ? `
           <div class="form-group password-group">
             <label for="confirm-password">Confirm Password</label>
             <input type="password" id="confirm-password" class="form-control" minlength="6" required>
@@ -46,7 +48,9 @@ function renderAuthForm(isLogin) {
               </svg>
             </span>
           </div>
-          ` : ''}
+          `
+              : ""
+          }
           <div class="auth-switch" style="margin-top: 1rem; text-align: right;">
               <a href="#/forgot-password">Forgot Password?</a>
           </div>
@@ -66,23 +70,25 @@ function attachFormListeners(app, isLogin) {
   const errorMessageDiv = document.getElementById("error-message");
   const passwordInput = document.getElementById("password");
   const confirmPasswordInput = document.getElementById("confirm-password"); // get confirm password field
-  const togglePasswordIcons = document.querySelectorAll(".password-toggle-icon");
+  const togglePasswordIcons = document.querySelectorAll(
+    ".password-toggle-icon",
+  );
 
   // toggles password visibility for all password fields
-  togglePasswordIcons.forEach(icon => {
+  togglePasswordIcons.forEach((icon) => {
     icon.addEventListener("click", () => {
       const targetInput = icon.previousElementSibling; // the input field before the icon
       const eyeOpen = icon.querySelectorAll(".eye-open");
       const eyeClosed = icon.querySelectorAll(".eye-closed");
-      
+
       if (targetInput.type === "password") {
         targetInput.type = "text";
-        eyeOpen.forEach(el => el.style.display = "none");
-        eyeClosed.forEach(el => el.style.display = "block");
+        eyeOpen.forEach((el) => (el.style.display = "none"));
+        eyeClosed.forEach((el) => (el.style.display = "block"));
       } else {
         targetInput.type = "password";
-        eyeOpen.forEach(el => el.style.display = "block");
-        eyeClosed.forEach(el => el.style.display = "none");
+        eyeOpen.forEach((el) => (el.style.display = "block"));
+        eyeClosed.forEach((el) => (el.style.display = "none"));
       }
     });
   });
@@ -93,9 +99,9 @@ function attachFormListeners(app, isLogin) {
     errorMessageDiv.style.display = "none"; // hide previous errors
 
     const submitBtn = form.querySelector('button[type="submit"]');
-    
+
     // show loading state
-    submitBtn.classList.add('btn-loading');
+    submitBtn.classList.add("btn-loading");
     submitBtn.disabled = true;
 
     const email = document.getElementById("email").value;
@@ -107,7 +113,7 @@ function attachFormListeners(app, isLogin) {
       if (password !== confirmPassword) {
         errorMessageDiv.textContent = "passwords do not match.";
         errorMessageDiv.style.display = "block";
-        submitBtn.classList.remove('btn-loading');
+        submitBtn.classList.remove("btn-loading");
         submitBtn.disabled = false;
         return;
       }
@@ -122,7 +128,10 @@ function attachFormListeners(app, isLogin) {
         window.location.hash = "#/dashboard";
       } else {
         data = await registerUser(email, password);
-        showToast("registration successful! please complete your profile.", 'success');
+        showToast(
+          "registration successful! please complete your profile.",
+          "success",
+        );
         // after successful registration, redirect to onboarding page
         localStorage.setItem("token", data.token);
         localStorage.setItem("user", JSON.stringify(data.user));
@@ -131,9 +140,9 @@ function attachFormListeners(app, isLogin) {
     } catch (error) {
       errorMessageDiv.textContent = error.message;
       errorMessageDiv.style.display = "block";
-      
+
       // reset button state on error
-      submitBtn.classList.remove('btn-loading');
+      submitBtn.classList.remove("btn-loading");
       submitBtn.disabled = false;
     }
   });

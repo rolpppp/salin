@@ -8,10 +8,10 @@ exports.createTransaction = async (req, res, next) => {
 
   // validation
   if (!title || !amount || !type || !date || !account_id || !category_id) {
-    console.error('❌ Validation failed - missing fields');
-    return res.status(400).json({ 
+    console.error("❌ Validation failed - missing fields");
+    return res.status(400).json({
       error: "Required fields are missing",
-      received: { title, amount, type, date, account_id, category_id }
+      received: { title, amount, type, date, account_id, category_id },
     });
   }
 
@@ -32,17 +32,17 @@ exports.createTransaction = async (req, res, next) => {
       .single();
 
     if (error) {
-      console.error('❌ Supabase error:', error);
+      console.error("❌ Supabase error:", error);
       throw error;
     }
 
-    console.log('✅ Transaction created:', data);
+    console.log("✅ Transaction created:", data);
     res.status(201).json({
       message: "Transaction created successfully.",
       transaction: data,
     });
   } catch (error) {
-    console.error('❌ Create transaction error:', error);
+    console.error("❌ Create transaction error:", error);
     next(error);
   }
 };
@@ -55,20 +55,22 @@ exports.getTransactions = async (req, res, next) => {
   try {
     let query = supabase
       .from("transactions")
-      .select(`
+      .select(
+        `
         *,
         categories(name),
         accounts(name)
-        `)
+        `,
+      )
       .eq("user_id", userId)
       .order("created_at", { ascending: false });
 
-    if (startDate) query = query.gte('date', startDate);
-    if (endDate) query = query.lte('date', endDate);
-    if (type) query = query.eq('type', type);
-    if (categoryId) query = query.eq('category_id', categoryId);
-    if (accountId) query = query.eq('account_id', accountId);
-    if (search) query = query.ilike('title', `%${search}%`);
+    if (startDate) query = query.gte("date", startDate);
+    if (endDate) query = query.lte("date", endDate);
+    if (type) query = query.eq("type", type);
+    if (categoryId) query = query.eq("category_id", categoryId);
+    if (accountId) query = query.eq("account_id", accountId);
+    if (search) query = query.ilike("title", `%${search}%`);
 
     const { data, error } = await query;
 
@@ -124,17 +126,17 @@ exports.deleteTransaction = async (req, res, next) => {
 
   try {
     // verify if transaction belongs to the user
-    const { error } = await supabase.rpc('delete_transaction_and_update_balance');
+    const { error } = await supabase.rpc(
+      "delete_transaction_and_update_balance",
+    );
 
     if (error) throw error;
 
-    res
-      .status(200)
-      .json({ message: "Transaction deleted successfully"});
+    res.status(200).json({ message: "Transaction deleted successfully" });
   } catch (error) {
-    if (error.message.includes('Transaction not found')) {
-            return res.status(404).json({ error: error.message });
-        }
+    if (error.message.includes("Transaction not found")) {
+      return res.status(404).json({ error: error.message });
+    }
     next(error);
   }
 };

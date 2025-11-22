@@ -42,8 +42,8 @@ export async function renderDashboardPage(app) {
         <div class="budget-info">
           <span>Monthly Budget</span>
           <span>₱${data.budget.spent.toFixed(2)} / ₱${parseFloat(
-      data.budget.amount
-    ).toFixed(2)}</span>
+            data.budget.amount,
+          ).toFixed(2)}</span>
         </div>
         <div class="budget-progress">
           <div class="budget-progress-bar" style="width: ${budgetPercent}%"></div>
@@ -99,7 +99,7 @@ function renderRecentTransactions(transactions) {
       const emptyBtn = document.getElementById("empty-add-expense-btn");
       if (emptyBtn) {
         emptyBtn.addEventListener("click", () =>
-          openTransactionForm("expense")
+          openTransactionForm("expense"),
         );
       }
     }, 0);
@@ -118,7 +118,7 @@ function renderRecentTransactions(transactions) {
         ${t.type === "income" ? "+" : "-"}₱${parseFloat(t.amount).toFixed(2)}
       </div>
     </li>
-    `
+    `,
     )
     .join("");
 }

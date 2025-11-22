@@ -1,9 +1,9 @@
 export function showModal(title, contentHTML) {
-    // remove any existing modal
-    const existingModal = document.getElementById("app-modal");
-    if (existingModal) existingModal.remove();
+  // remove any existing modal
+  const existingModal = document.getElementById("app-modal");
+  if (existingModal) existingModal.remove();
 
-    const modalHTML = `
+  const modalHTML = `
         <div id="app-modal" class="modal visible">
             <div class="modal-content">
                 <div class="modal-header">
@@ -17,23 +17,23 @@ export function showModal(title, contentHTML) {
         </div>
     `;
 
-    document.body.insertAdjacentHTML('beforeend', modalHTML);
-    
-    const modal = document.getElementById("app-modal");
-    const closeBtn = document.getElementById("modal-close-btn");
+  document.body.insertAdjacentHTML("beforeend", modalHTML);
 
-    closeBtn.addEventListener("click", hideModal);
+  const modal = document.getElementById("app-modal");
+  const closeBtn = document.getElementById("modal-close-btn");
 
-    modal.addEventListener("click", (e) => {
-        if (e.targer === modal) {
-            hideModal();
-        }
-    });
+  closeBtn.addEventListener("click", hideModal);
+
+  modal.addEventListener("click", (e) => {
+    if (e.targer === modal) {
+      hideModal();
+    }
+  });
 }
 
 export function hideModal() {
-    const modal = document.getElementById("app-modal");
-    if (modal) {
-        modal.remove();
-    }
+  const modal = document.getElementById("app-modal");
+  if (modal) {
+    modal.remove();
+  }
 }

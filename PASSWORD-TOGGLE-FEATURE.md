@@ -1,6 +1,7 @@
 # Password Toggle Visibility Feature
 
 ## Overview
+
 Added a password visibility toggle feature to all password input fields in the authentication pages, allowing users to show/hide their password as they type.
 
 ---
@@ -8,14 +9,16 @@ Added a password visibility toggle feature to all password input fields in the a
 ## Implementation Details
 
 ### 1. Visual Design
+
 - **Toggle Icon**: Eye icon (open/closed) using SVG for crisp rendering
-- **Icon States**: 
+- **Icon States**:
   - Open eye (👁️) - Password is hidden (default)
   - Closed eye with slash - Password is visible
 - **Position**: Positioned inside the password field on the right side
 - **Interaction**: Click/tap to toggle visibility
 
 ### 2. User Experience
+
 - **Hover Effect**: Background color change on hover for better feedback
 - **Active State**: Slight scale animation on click
 - **Smooth Transitions**: All state changes are animated
@@ -24,6 +27,7 @@ Added a password visibility toggle feature to all password input fields in the a
 ### 3. Technical Implementation
 
 #### CSS Styles
+
 ```css
 .password-group {
   position: relative;
@@ -40,6 +44,7 @@ Added a password visibility toggle feature to all password input fields in the a
 ```
 
 #### JavaScript Logic
+
 ```javascript
 toggleIcon.addEventListener("click", () => {
   if (passwordInput.type === "password") {
@@ -57,6 +62,7 @@ toggleIcon.addEventListener("click", () => {
 ## Files Modified
 
 ### CSS
+
 - `/client/public/src/styles/main.css`
   - Added `.password-group` styles
   - Added `.password-toggle-icon` styles
@@ -64,6 +70,7 @@ toggleIcon.addEventListener("click", () => {
   - Added SVG icon support
 
 ### JavaScript Pages
+
 1. **Login/Register Page** (`/client/public/src/js/pages/auth/login.js`)
    - Added password toggle icon to HTML structure
    - Added toggle event listener
@@ -79,6 +86,7 @@ toggleIcon.addEventListener("click", () => {
 ## Icon Design
 
 ### Open Eye (Password Hidden - Default)
+
 ```svg
 <svg viewBox="0 0 24 24">
   <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
@@ -87,6 +95,7 @@ toggleIcon.addEventListener("click", () => {
 ```
 
 ### Closed Eye with Slash (Password Visible)
+
 ```svg
 <svg viewBox="0 0 24 24">
   <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8..."></path>
@@ -115,12 +124,14 @@ toggleIcon.addEventListener("click", () => {
 ## Accessibility Considerations
 
 ### Implemented
+
 - **Keyboard Accessible**: Icon can be clicked/tapped
 - **Visual Feedback**: Clear hover and active states
 - **Color Contrast**: Uses semantic colors that meet WCAG standards
 - **Icon Clarity**: SVG icons scale properly at all sizes
 
 ### Future Improvements
+
 - Add ARIA labels for screen readers
 - Add keyboard shortcut (e.g., Ctrl+Shift+P to toggle)
 - Add tooltip on hover explaining the function
@@ -130,10 +141,12 @@ toggleIcon.addEventListener("click", () => {
 ## Browser Compatibility
 
 ### Tested Browsers
+
 - ✅ Modern browsers (Chrome, Firefox, Safari, Edge)
 - ✅ Mobile browsers (iOS Safari, Chrome Mobile)
 
 ### Known Compatibility
+
 - SVG icons supported in all modern browsers
 - CSS positioning works across all viewports
 - Touch targets meet 44px minimum for mobile
@@ -143,6 +156,7 @@ toggleIcon.addEventListener("click", () => {
 ## Security Considerations
 
 ### Safe Implementation
+
 - **Client-Side Only**: Toggle only changes input type attribute
 - **No Data Exposure**: Password remains secure in memory
 - **Standard Behavior**: Uses native browser input[type="text/password"]
@@ -153,6 +167,7 @@ toggleIcon.addEventListener("click", () => {
 ## Testing Checklist
 
 ### Visual Testing
+
 - [x] Icon appears in correct position
 - [x] Icon changes on click
 - [x] Hover effect works
@@ -160,6 +175,7 @@ toggleIcon.addEventListener("click", () => {
 - [x] Works on all password fields
 
 ### Interaction Testing
+
 - [x] Click toggles password visibility
 - [x] Icon state matches password visibility
 - [x] Works with form submission
@@ -167,6 +183,7 @@ toggleIcon.addEventListener("click", () => {
 - [x] Touch works on mobile
 
 ### Responsive Testing
+
 - [x] Icon position correct on mobile
 - [x] Touch target large enough (24px + padding)
 - [x] Works in all viewport sizes
@@ -178,7 +195,7 @@ toggleIcon.addEventListener("click", () => {
 ```html
 <div class="form-group password-group">
   <label for="password">Password</label>
-  <input type="password" id="password" class="form-control" required>
+  <input type="password" id="password" class="form-control" required />
   <span class="password-toggle-icon">
     <svg><!-- Eye icon SVG --></svg>
   </span>
@@ -193,15 +210,15 @@ const toggleIcon = document.querySelector(".password-toggle-icon");
 toggleIcon.addEventListener("click", () => {
   const eyeOpen = toggleIcon.querySelectorAll(".eye-open");
   const eyeClosed = toggleIcon.querySelectorAll(".eye-closed");
-  
+
   if (passwordInput.type === "password") {
     passwordInput.type = "text";
-    eyeOpen.forEach(el => el.style.display = "none");
-    eyeClosed.forEach(el => el.style.display = "block");
+    eyeOpen.forEach((el) => (el.style.display = "none"));
+    eyeClosed.forEach((el) => (el.style.display = "block"));
   } else {
     passwordInput.type = "password";
-    eyeOpen.forEach(el => el.style.display = "block");
-    eyeClosed.forEach(el => el.style.display = "none");
+    eyeOpen.forEach((el) => (el.style.display = "block"));
+    eyeClosed.forEach((el) => (el.style.display = "none"));
   }
 });
 ```
@@ -211,18 +228,21 @@ toggleIcon.addEventListener("click", () => {
 ## Design Rationale
 
 ### Why SVG Icons?
+
 - **Scalability**: Crisp at any size
 - **Customization**: Easy to change color with CSS
 - **Performance**: Inline SVG loads instantly
 - **Accessibility**: Can be styled for different themes
 
 ### Why Inside the Input?
+
 - **Standard Pattern**: Matches user expectations
 - **Space Efficient**: Doesn't require extra space
 - **Clear Association**: Obviously related to the password field
 - **Mobile Friendly**: Easy to tap on small screens
 
 ### Why Eye Icon?
+
 - **Universal Symbol**: Recognized across cultures
 - **Clear Meaning**: Intuitive "show/hide" metaphor
 - **Standard Practice**: Used by major websites (Google, Facebook, etc.)
@@ -233,6 +253,7 @@ toggleIcon.addEventListener("click", () => {
 ## Future Enhancements
 
 ### Potential Improvements
+
 1. **Strength Indicator**: Add password strength meter
 2. **Generate Password**: Add button to generate secure password
 3. **Confirm Password**: Add toggle to matching confirmation field

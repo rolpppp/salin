@@ -33,7 +33,7 @@ export async function renderTransactionsPage(app) {
                         <option value="">ALL</option>
                         ${categories.data
                           .map(
-                            (c) => `<option value="${c.id}">${c.name}</option>`
+                            (c) => `<option value="${c.id}">${c.name}</option>`,
                           )
                           .join("")}
                     </select>
@@ -113,7 +113,7 @@ function attachFilterListeners() {
     if (target.classList.contains("delete-btn")) {
       if (
         confirm(
-          "Are you sure you want to delete this transaction? This will also update your account balance."
+          "Are you sure you want to delete this transaction? This will also update your account balance.",
         )
       ) {
         try {
@@ -129,7 +129,7 @@ function attachFilterListeners() {
     // --- EDIT LOGIC ---
     if (target.classList.contains("edit-btn")) {
       const transactionToEdit = allTransactions.find(
-        (t) => t.id === transactionId
+        (t) => t.id === transactionId,
       );
       if (transactionToEdit) {
         const { openTransactionForm } = await import(
@@ -199,8 +199,8 @@ function renderTransactionsList(list) {
                 <td>${t.date}</td>
                 <td>${t.title}</td>
                 <td class="amount ${typeClass}"> ${
-      t.type === "income" ? "+" : "-"
-    }₱${formattedAmount}
+                  t.type === "income" ? "+" : "-"
+                }₱${formattedAmount}
                 </td>
                 <td>
                 <div class="item-actions">

@@ -6,7 +6,7 @@ if ("serviceWorker" in navigator) {
       .then((registration) => {
         console.log(
           "serviceWorker registration successful with scope: ",
-          registration.scope
+          registration.scope,
         );
       })
       .catch((err) => {
@@ -107,7 +107,7 @@ function router() {
 // renders a generic error page with a retry button
 export function renderErrorPage(
   app,
-  message = "an unexpected error occurred."
+  message = "an unexpected error occurred.",
 ) {
   app.innerHTML = `
         <div class="card error-page">

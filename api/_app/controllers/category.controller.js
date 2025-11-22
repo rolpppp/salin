@@ -45,7 +45,8 @@ exports.getCategoryByType = async (req, res, next) => {
     const { data, error } = await supabase
       .from("categories")
       .select("*")
-      .eq("user_id", userID).eq("type", type);
+      .eq("user_id", userID)
+      .eq("type", type);
 
     if (error) throw error;
     res.status(200).json({ data });
@@ -53,7 +54,6 @@ exports.getCategoryByType = async (req, res, next) => {
     next(error);
   }
 };
-
 
 exports.updateCategory = async (req, res, next) => {
   const userId = req.user.id;
@@ -110,7 +110,8 @@ exports.deleteCategory = async (req, res, next) => {
       .from("categories")
       .delete()
       .eq("id", id)
-      .select().single();
+      .select()
+      .single();
 
     if (error) throw error;
 

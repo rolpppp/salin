@@ -70,7 +70,7 @@ function attachOnboardingListeners() {
       .getElementById("account-type")
       .value.toLowerCase();
     const initialBalance = parseFloat(
-      document.getElementById("initial-balance").value
+      document.getElementById("initial-balance").value,
     );
 
     // validation

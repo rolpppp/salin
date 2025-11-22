@@ -7,7 +7,8 @@
     "start": "node api/index.js",
     "server": "nodemon api/index.js",
     "client": "npx live-server client/public --proxy=/api:http://localhost:3000",
-    "dev": "npm run server & npm run client"
+    "dev": "npm run server & npm run client",
+    "format": "prettier --write ."
   },
   "repository": {
     "type": "git",
@@ -23,18 +24,14 @@
   "dependencies": {
     "@google/genai": "^1.29.0",
     "@supabase/supabase-js": "^2.78.0",
-    "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
-    "express-rate-limit": "^8.2.1",
-    "express-validator": "^7.3.0",
     "jsonwebtoken": "^9.0.2",
-    "nodemailer": "^7.0.10",
     "nodemon": "^3.1.10",
     "serverless-http": "^4.0.0"
   },
   "devDependencies": {
-    "concurrently": "^9.2.1"
+    "prettier": "^3.6.2"
   }
 }

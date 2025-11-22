@@ -41,7 +41,7 @@ if (process.env.NODE_ENV !== "production" && !process.env.LAMBDA_TASK_ROOT) {
       interfaces[interfaceName].forEach((iface) => {
         if (iface.family === "IPv4" && !iface.internal) {
           console.log(
-            `📱 Server accessible at http://${iface.address}:${PORT}`
+            `📱 Server accessible at http://${iface.address}:${PORT}`,
           );
         }
       });

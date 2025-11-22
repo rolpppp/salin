@@ -150,7 +150,7 @@ exports.resetPassword = async (req, res) => {
     // The user is now authenticated. Update the password.
     const { error: updateError } = await supabase.auth.admin.updateUserById(
       user.id,
-      { password: newPassword }
+      { password: newPassword },
     );
 
     if (updateError) {

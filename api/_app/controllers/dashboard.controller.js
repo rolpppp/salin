@@ -7,10 +7,10 @@ exports.getDashboardData = async (req, res, next) => {
   const type = "expense";
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
-  
+
   // Start of current month
   const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
-  
+
   // End of current month (start of next month - 1 day)
   const endOfMonth = new Date(year, month, 0); // Last day of current month
   const endDate = endOfMonth.toISOString().split("T")[0];
@@ -21,7 +21,7 @@ exports.getDashboardData = async (req, res, next) => {
       totalBalanceData,
       recentTransactionsData,
       budgetData,
-      totalSpentData
+      totalSpentData,
     ] = await Promise.all([
       // getting total balance from all accounts
       supabase.from("accounts").select("balance").eq("user_id", userId),
@@ -49,8 +49,9 @@ exports.getDashboardData = async (req, res, next) => {
         .select("total:amount.sum()")
         .eq("user_id", userId)
         .eq("type", type)
-        .gte("date",  startDate)
-        .lte("date", endDate).single()
+        .gte("date", startDate)
+        .lte("date", endDate)
+        .single(),
     ]);
 
     if (recentTransactionsData.error) throw recentTransactionsData.error;
@@ -62,7 +63,7 @@ exports.getDashboardData = async (req, res, next) => {
     // process the data
     const totalBalance = totalBalanceData.data.reduce(
       (sum, account) => sum + parseFloat(account.balance),
-      0
+      0,
     );
 
     // total
