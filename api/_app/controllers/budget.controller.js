@@ -117,7 +117,7 @@ exports.deleteBudget = async (req, res, next) => {
 
   try {
     const { data: existingBudget, error: findError } = await supabase
-      .from("categories")
+      .from("budgets")
       .select("id")
       .eq("id", id)
       .eq("user_id", userId)
@@ -128,7 +128,7 @@ exports.deleteBudget = async (req, res, next) => {
     }
 
     const { data, error } = await supabase
-      .from("accounts")
+      .from("budgets")
       .delete()
       .eq("id", id)
       .select()
@@ -136,7 +136,7 @@ exports.deleteBudget = async (req, res, next) => {
 
     if (error) throw error;
 
-    res.status(201).json({ message: "Account deleted successfully" });
+    res.status(201).json({ message: "Budget deleted successfully" });
   } catch (error) {
     next(error);
   }

@@ -103,42 +103,49 @@ exports.forgotPassword = async (req, res, next) => {
 };
 
 exports.resetPassword = async (req, res) => {
-    const { newPassword } = req.body;
-    const authHeader = req.headers.authorization;
+  const { newPassword } = req.body;
+  const authHeader = req.headers.authorization;
 
-    if (!authHeader || !authHeader.startsWith('Bearer ')) {
-        return res.status(401).json({ message: 'Authorization header is missing or invalid' });
+  if (!authHeader || !authHeader.startsWith("Bearer ")) {
+    return res
+      .status(401)
+      .json({ message: "Authorization header is missing or invalid" });
+  }
+
+  const token = authHeader.split(" ")[1];
+
+  if (!token || !newPassword) {
+    return res
+      .status(400)
+      .json({ message: "Token and new password are required" });
+  }
+
+  try {
+    // Verify the token and get the user
+    const {
+      data: { user },
+      error: userError,
+    } = await supabase.auth.getUser(token);
+
+    if (userError) {
+      console.error("Error getting user from token:", userError.message);
+      return res.status(401).json({ message: "Invalid or expired token" });
     }
 
-    const token = authHeader.split(' ')[1];
+    // The user is now authenticated. Update the password.
+    const { error: updateError } = await supabase.auth.admin.updateUserById(
+      user.id,
+      { password: newPassword }
+    );
 
-    if (!token || !newPassword) {
-        return res.status(400).json({ message: 'Token and new password are required' });
+    if (updateError) {
+      console.error("Password update error:", updateError.message);
+      return res.status(500).json({ message: "Failed to update password" });
     }
 
-    try {
-        // Verify the token and get the user
-        const { data: { user }, error: userError } = await supabase.auth.getUser(token);
-
-        if (userError) {
-            console.error('Error getting user from token:', userError.message);
-            return res.status(401).json({ message: 'Invalid or expired token' });
-        }
-
-        // The user is now authenticated. Update the password.
-        const { error: updateError } = await supabase.auth.admin.updateUserById(
-            user.id,
-            { password: newPassword }
-        );
-
-        if (updateError) {
-            console.error('Password update error:', updateError.message);
-            return res.status(500).json({ message: 'Failed to update password' });
-        }
-
-        return res.status(200).json({ message: 'Password reset successfully' });
-    } catch (error) {
-        console.error('Server error during password reset:', error.message);
-        return res.status(500).json({ message: 'Internal server error' });
-    }
+    return res.status(200).json({ message: "Password reset successfully" });
+  } catch (error) {
+    console.error("Server error during password reset:", error.message);
+    return res.status(500).json({ message: "Internal server error" });
+  }
 };
