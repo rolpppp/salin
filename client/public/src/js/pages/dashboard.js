@@ -84,7 +84,22 @@ export async function renderDashboardPage(app) {
 function renderRecentTransactions(transactions) {
   const list = document.getElementById("recent-transactions-list");
   if (transactions.length == 0) {
-    list.innerHTML = "<li>No recent transaction</li>";
+    list.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-state-icon">📊</div>
+        <h3>No Transactions Yet</h3>
+        <p>Start tracking your finances by adding your first transaction.</p>
+        <button id="empty-add-expense-btn" class="btn btn-primary">Add Transaction</button>
+      </div>
+    `;
+    
+    // Add click listener for empty state button
+    setTimeout(() => {
+      const emptyBtn = document.getElementById("empty-add-expense-btn");
+      if (emptyBtn) {
+        emptyBtn.addEventListener("click", () => openTransactionForm("expense"));
+      }
+    }, 0);
     return;
   }
 

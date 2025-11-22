@@ -24,14 +24,26 @@ export function renderForgotPasswordPage(app) {
     const form = document.getElementById('forgot-password-form');
     form.addEventListener('submit', async (e) => {
         e.preventDefault();
+        
+        const submitBtn = form.querySelector('button[type="submit"]');
+        
+        // Show loading state
+        submitBtn.classList.add('btn-loading');
+        submitBtn.disabled = true;
+        
         const email = document.getElementById('email').value;
         const messageArea = document.getElementById('message-area');
+        
         try {
             const data = await forgotPassword(email);
             messageArea.innerHTML = `<p style="color: var(--secondary-color);">${data.message}</p>`;
             form.style.display = 'none'; // Hide form on success
         } catch (error) {
             messageArea.innerHTML = `<p class="error-message" style="display: block;">${error.message}</p>`;
+            
+            // Reset button state on error
+            submitBtn.classList.remove('btn-loading');
+            submitBtn.disabled = false;
         }
     });
 }

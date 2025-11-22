@@ -1,5 +1,17 @@
+const isLocal =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1" ||
+  window.location.hostname.startsWith("192.168.") ||
+  window.location.hostname.startsWith("10.") ||
+  window.location.hostname.startsWith("172.");
+
+// for local development, use the same host as the frontend (supports local network ips)
+const API_BASE_URL = isLocal
+  ? `http://${window.location.hostname}:3000/api`
+  : "/api";
+
 async function request(endpoint, options = {}) {
-  const url = `/api${endpoint}`;
+  const url = `${API_BASE_URL}${endpoint}`;
 
   
 
