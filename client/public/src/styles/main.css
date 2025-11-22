@@ -40,15 +40,12 @@ body {
   margin-bottom: var(--space-md);
 }
 
-.btn {
-  display: inline-block;
-  padding: var(--space-sm) var(--space-md);
-  border: none;
-  border-radius: var(--border-radius);
-  cursor: pointer;
-  text-align: center;
-  font-weight: 500;
-  transition: background-color 0.2s ease;
+.btn:hover {
+  background-color: var(--primary-dark-color);
+}
+
+.btn:active {
+  transform: scale(0.98);
 }
 
 .btn-primary {
@@ -141,6 +138,7 @@ body {
   color: var(--text-light-color);
   font-weight: 500;
   cursor: pointer;
+  user-select: none;
 }
 
 .balance-card h2 {
@@ -417,8 +415,9 @@ body {
     background: none;
     border: none;
     cursor: pointer;
-    padding: var(--space-xs);
+    padding: var(--space-sm);
     margin-left: var(--space-sm);
+    user-select: none;
 }
 
 .fab-add-button {
@@ -437,4 +436,46 @@ body {
     display: flex;
     justify-content: center;
     align-items: center;
+}
+
+.fab-add-button:active {
+    transform: scale(0.95);
+}
+
+/* --- TOAST NOTIFICATIONS --- */
+#toast-container {
+    position: fixed;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    z-index: 2000;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-sm);
+}
+
+.toast {
+    background-color: var(--card-bg-color);
+    color: var(--text-color);
+    padding: var(--space-md) var(--space-lg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    font-weight: 500;
+    border-left: 5px solid;
+}
+
+.toast.visible {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast.success {
+    border-left-color: var(--secondary-color);
+}
+
+.toast.error {
+    border-left-color: var(--danger-color);
 }
