@@ -1,12 +1,9 @@
-import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm';
-import { supabaseConfig } from '../../../config/supabase.config.js';
+import { resetPassword } from "../../api.js";
 
-const supabase = createClient(supabaseConfig.url, supabaseConfig.anonKey);
-
-let isRecoverySession = false;
+let recoveryToken = null;
 
 export function renderResetPasswordPage(app) {
-    app.innerHTML = `
+  app.innerHTML = `
         <div class="auth-container">
             <div class="card auth-card">
                 <h1>Reset Your Password</h1>
@@ -21,94 +18,61 @@ export function renderResetPasswordPage(app) {
             </div>
         </div>
     `;
-    
-    handlePasswordRecovery();
-    attachResetFormListener();
+
+  extractTokenFromURL();
+  attachResetFormListener();
 }
 
-async function handlePasswordRecovery() {
-    const messageArea = document.getElementById('message-area');
-    const hash = window.location.hash;
+function extractTokenFromURL() {
+  const messageArea = document.getElementById("message-area");
+  const hash = window.location.hash;
 
-    // Listen for Supabase auth state changes
-    supabase.auth.onAuthStateChange((event, session) => {
-        console.log('Auth event:', event, 'Session:', session);
-        
-        if (event === 'PASSWORD_RECOVERY') {
-            isRecoverySession = true;
-            messageArea.innerHTML = `<p style="color: var(--secondary-color);">Ready to reset your password. Enter a new password below.</p>`;
-        } else if (event === 'SIGNED_IN' && session) {
-            // Also handle if recovery session is established
-            isRecoverySession = true;
-            messageArea.innerHTML = `<p style="color: var(--secondary-color);">Ready to reset your password. Enter a new password below.</p>`;
-        }
-    });
+  // Extract access_token from URL hash
+  // Format: #/reset-password#access_token=xxx&type=recovery
+  const hashParts = hash.split("#");
 
-    // If URL has recovery token, Supabase should auto-process it
-    if (hash.includes('access_token') && hash.includes('type=recovery')) {
-        console.log('Recovery token detected in URL');
-        messageArea.innerHTML = `<p style="color: var(--secondary-color);">Processing recovery link...</p>`;
-        
-        // Give Supabase time to process the hash parameters
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        // Check session after Supabase processes the token
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('Session after delay:', session);
-        
-        if (session) {
-            isRecoverySession = true;
-            messageArea.innerHTML = `<p style="color: var(--secondary-color);">Ready to reset your password. Enter a new password below.</p>`;
-        } else {
-            messageArea.innerHTML = `<p class="error-message" style="display: block;">Unable to process recovery link. Please request a new one.</p>`;
-        }
+  if (hashParts.length > 2) {
+    const params = new URLSearchParams(hashParts[2]);
+    const token = params.get("access_token");
+    const type = params.get("type");
+
+    if (token && type === "recovery") {
+      recoveryToken = token;
+      messageArea.innerHTML = `<p style="color: var(--secondary-color);">Ready to reset your password. Enter a new password below.</p>`;
+
     } else {
-        // Check if there's already a session
-        const { data: { session } } = await supabase.auth.getSession();
-        console.log('Existing session:', session);
-        
-        if (session) {
-            isRecoverySession = true;
-            messageArea.innerHTML = `<p style="color: var(--secondary-color);">Ready to reset your password. Enter a new password below.</p>`;
-        } else {
-            messageArea.innerHTML = `<p class="error-message" style="display: block;">Invalid or expired reset link. Please request a new one.</p>`;
-        }
+      messageArea.innerHTML = `<p class="error-message" style="display: block;">Invalid reset link. Please request a new one.</p>`;
     }
+  } else {
+    messageArea.innerHTML = `<p class="error-message" style="display: block;">Invalid or expired reset link. Please request a new one.</p>`;
+  }
 }
 
 function attachResetFormListener() {
-    const form = document.getElementById('reset-password-form');
-    const messageArea = document.getElementById('message-area');
+  const form = document.getElementById("reset-password-form");
+  const messageArea = document.getElementById("message-area");
 
-    form.addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const newPassword = document.getElementById('new-password').value;
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const newPassword = document.getElementById("new-password").value;
 
-        if (!isRecoverySession) {
-            messageArea.innerHTML = `<p class="error-message" style="display: block;">No active recovery session. Please request a new reset link.</p>`;
-            return;
-        }
+    if (!recoveryToken) {
+      messageArea.innerHTML = `<p class="error-message" style="display: block;">No valid recovery token. Please request a new reset link.</p>`;
+      return;
+    }
 
-        try {
-            // Use Supabase's built-in updateUser method
-            const { data, error } = await supabase.auth.updateUser({
-                password: newPassword
-            });
+    try {
+      // Call backend API to reset password
+      const response = await resetPassword(newPassword, recoveryToken);
 
-            if (error) {
-                throw error;
-            }
+      messageArea.innerHTML = `<p style="color: var(--secondary-color);">${response.message}</p>`;
+      form.style.display = "none";
 
-            messageArea.innerHTML = `<p style="color: var(--secondary-color);">Password has been reset successfully! Redirecting to login...</p>`;
-            form.style.display = 'none';
-            
-            // Sign out to clear the recovery session
-            await supabase.auth.signOut();
-            
-            setTimeout(() => window.location.hash = '#/login', 3000);
-        } catch (error) {
-            console.error('Password reset error:', error);
-            messageArea.innerHTML = `<p class="error-message" style="display: block;">${error.message || 'Unable to reset password. Please try again.'}</p>`;
-        }
-    });
+      setTimeout(() => (window.location.hash = "#/login"), 3000);
+    } catch (error) {
+      messageArea.innerHTML = `<p class="error-message" style="display: block;">${
+        error.message || "Unable to reset password. Please try again."
+      }</p>`;
+    }
+  });
 }

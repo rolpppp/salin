@@ -1,19 +1,19 @@
-const isLocal = window.location.hostname === 'localhost' || 
-                window.location.hostname === '127.0.0.1' ||
-                window.location.hostname.startsWith('192.168.') ||
-                window.location.hostname.startsWith('10.') ||
-                window.location.hostname.startsWith('172.');
+const isLocal =
+  window.location.hostname === "localhost" ||
+  window.location.hostname === "127.0.0.1" ||
+  window.location.hostname.startsWith("192.168.") ||
+  window.location.hostname.startsWith("10.") ||
+  window.location.hostname.startsWith("172.");
 
 // For local development, use the same host as the frontend (supports local network IPs)
 const API_BASE_URL = isLocal
   ? `http://${window.location.hostname}:3000/api`
-  : 'https://salin-six.vercel.app/api';
+  : "https://salin-six.vercel.app/api";
 
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
 
-  console.log('🔍 Requesting:', url); 
-  console.log('🔍 API_BASE_URL:', API_BASE_URL); 
+  
 
   options.headers = {
     "Content-Type": "application/json",
@@ -25,13 +25,13 @@ async function request(endpoint, options = {}) {
     const data = await response.json();
 
     if (!response.ok) {
-      console.error('❌ API Error Response:', data);
-      throw new Error(data.error || data.details || "An unknown error occured.");
+      throw new Error(
+        data.error || data.details || "An unknown error occured."
+      );
     }
 
     return data;
   } catch (error) {
-    console.error(`API request to ${endpoint} failed:`, error);
     throw error;
   }
 }
@@ -43,7 +43,7 @@ export async function loginUser(email, password) {
     body: JSON.stringify({ email, password }),
   });
 
-  if (response.user){
+  if (response.user) {
     localStorage.setItem("user_id", response.user.id);
   }
 
@@ -58,21 +58,24 @@ export function registerUser(email, password) {
 }
 
 export function forgotPassword(email) {
-    return request('/auth/forgot-password', {
-        method: 'POST',
-        body: JSON.stringify({ email }),
-    });
+  return request("/auth/forgot-password", {
+    method: "POST",
+    body: JSON.stringify({ email }),
+  });
 }
 
-export function resetPassword(newPassword){
-  return request('/auth/reset-password', {
-        method: 'PUT',
-        body: JSON.stringify({ newPassword })
+export function resetPassword(newPassword, token) {
+  return request("/auth/reset-password", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ newPassword }),
   });
 }
 
 // --- Getting User ID ---
-export function getUserID(){
+export function getUserID() {
   return localStorage.getItem("user_id");
 }
 // --- Dashboard Endpoints ---
@@ -88,24 +91,24 @@ export function getDashboardData() {
 function getAuthHeaders() {
   const token = localStorage.getItem("token");
   if (!token) throw new Error("No auth token found.");
-  return { "Authorization": `Bearer ${token}`};
+  return { Authorization: `Bearer ${token}` };
 }
 
 // --- Data Fetching Endpoints ---
 export function getAccounts() {
-  return request("/accounts", { headers: getAuthHeaders()});
+  return request("/accounts", { headers: getAuthHeaders() });
 }
 
 export function getCategoriesByType(type) {
-  return request(`/categories/type/${type}`, {headers: getAuthHeaders() });
+  return request(`/categories/type/${type}`, { headers: getAuthHeaders() });
 }
 
 export function getCategories() {
-  return request("/categories", {headers: getAuthHeaders()});
+  return request("/categories", { headers: getAuthHeaders() });
 }
 
 export function getCurrentBudget() {
-  return request("/budget/current", {headers: getAuthHeaders()});
+  return request("/budget/current", { headers: getAuthHeaders() });
 }
 
 export function getTransactions(filters = {}) {
@@ -115,7 +118,7 @@ export function getTransactions(filters = {}) {
   const query = new URLSearchParams(filters).toString();
 
   return request(`/transactions?${query}`, {
-    headers: { "Authorization": `Bearer ${token}`}
+    headers: { Authorization: `Bearer ${token}` },
   });
 }
 
@@ -124,7 +127,7 @@ export function createTransaction(transactionData) {
   return request("/transactions", {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify(transactionData)
+    body: JSON.stringify(transactionData),
   });
 }
 
@@ -134,7 +137,7 @@ export function createAccount(accountData) {
   return request("/accounts", {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify(accountData)
+    body: JSON.stringify(accountData),
   });
 }
 
@@ -142,15 +145,15 @@ export function updateAccount(id, accountData) {
   return request(`/accounts/${id}`, {
     method: "PUT",
     headers: getAuthHeaders(),
-    body: JSON.stringify(accountData)
+    body: JSON.stringify(accountData),
   });
 }
 
 export function deleteAccount(id) {
   return request(`/accounts/${id}`, {
     method: "DELETE",
-    headers: getAuthHeaders()
-  })
+    headers: getAuthHeaders(),
+  });
 }
 
 // --- Category Endpoints ---
@@ -159,7 +162,7 @@ export function createCategory(categoriesData) {
   return request("/categories", {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify(categoriesData)
+    body: JSON.stringify(categoriesData),
   });
 }
 
@@ -167,14 +170,14 @@ export function updateCategory(id, categoriesData) {
   return request(`/categories/${id}`, {
     method: "PUT",
     headers: getAuthHeaders(),
-    body: JSON.stringify(categoriesData)
+    body: JSON.stringify(categoriesData),
   });
 }
 
 export function deleteCategory(id) {
   return request(`/categories/${id}`, {
     method: "DELETE",
-    headers: getAuthHeaders()
+    headers: getAuthHeaders(),
   });
 }
 
@@ -184,7 +187,7 @@ export function setBudget(budgetData) {
   return request("/budget", {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify(budgetData)
+    body: JSON.stringify(budgetData),
   });
 }
 
@@ -192,7 +195,7 @@ export function updateBudget(id, budgetData) {
   return request(`/budget/${id}`, {
     method: "PUT",
     headers: getAuthHeaders(),
-    body: JSON.stringify(budgetData)
+    body: JSON.stringify(budgetData),
   });
 }
 
@@ -202,22 +205,22 @@ export function parseText(text) {
   return request("/parse", {
     method: "POST",
     headers: getAuthHeaders(),
-    body: JSON.stringify({text})
+    body: JSON.stringify({ text }),
   });
 }
 
 // --- Transactions Endpoints ---
 export function updateTransaction(id, transactionData) {
-    return request(`/transactions/${id}`, {
-        method: 'PUT',
-        headers: getAuthHeaders(),
-        body: JSON.stringify(transactionData)
-    });
+  return request(`/transactions/${id}`, {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(transactionData),
+  });
 }
 
 export function deleteTransaction(id) {
-    return request(`/transactions/${id}`, {
-        method: 'DELETE',
-        headers: getAuthHeaders()
-    });
+  return request(`/transactions/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
 }

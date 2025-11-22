@@ -1,4 +1,5 @@
 const supabase = require("../config/supabase");
+const { createClient } = require("@supabase/supabase-js");
 const jwt = require("jsonwebtoken");
 
 // register a new user
@@ -75,78 +76,69 @@ exports.loginUser = async (req, res, next) => {
 exports.forgotPassword = async (req, res, next) => {
   const { email } = req.body;
 
-  if (!email){
-    return res.status(400).json({ error: "Email is required"});
+  if (!email) {
+    return res.status(400).json({ error: "Email is required" });
   }
 
   const originHeader = req.headers.origin;
-  const fallbackOrigin = process.env.CLIENT_URL || process.env.NEXT_PUBLIC_SITE_URL || process.env.PUBLIC_SITE_URL || "http://localhost:8080";
+  const fallbackOrigin =
+    process.env.CLIENT_URL ||
+    process.env.NEXT_PUBLIC_SITE_URL ||
+    process.env.PUBLIC_SITE_URL ||
+    "http://localhost:8080";
   const baseUrl = (originHeader || fallbackOrigin).replace(/\/$/, "");
 
-  const {data, error} = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${baseUrl}/#/reset-password`
+  const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `${baseUrl}/#/reset-password`,
   });
 
   if (error) {
     console.error("Password reset error: ", error.message);
   }
 
-  res.status(200).json({ message: "If an account with that email exists, a password reset link has been sent."});
-}
+  res.status(200).json({
+    message:
+      "If an account with that email exists, a password reset link has been sent.",
+  });
+};
 
-// reset password
-exports.resetPassword = async (req, res, next) => {
-  const { newPassword } = req.body;
-  const authHeader = req.header("Authorization");
+exports.resetPassword = async (req, res) => {
+    const { newPassword } = req.body;
+    const authHeader = req.headers.authorization;
 
-  if(!newPassword || !authHeader){
-    return res.status(400).json({ error: "A valid session token and new password are required."});
-  }
-
-  const token = authHeader.split(" ")[1];
-
-  try {
-    const supabaseAdmin = createClient(
-      process.env.SUPABASE_URL,
-      process.env.SUPABASE_SERVICE_KEY,
-      { auth: { persistSession: false, autoRefreshToken: false }}
-    );
-
-    console.log("Attempting to set session with recovery token...");
-    
-    // Set the session with the recovery access token
-    const { data: sessionData, error: sessionError } = await supabaseAdmin.auth.setSession({
-      access_token: token,
-      refresh_token: '' // Recovery tokens don't require refresh token
-    });
-
-    if (sessionError) {
-      console.error("Session error:", sessionError.message, sessionError);
-      return res.status(401).json({ error: "Invalid or expired token. Please request a new password reset." });
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+        return res.status(401).json({ message: 'Authorization header is missing or invalid' });
     }
 
-    if (!sessionData?.user?.id) {
-      console.error("No user in session data");
-      return res.status(401).json({ error: "Invalid or expired token. Please request a new password reset." });
+    const token = authHeader.split(' ')[1];
+
+    if (!token || !newPassword) {
+        return res.status(400).json({ message: 'Token and new password are required' });
     }
 
-    console.log("Session established for user:", sessionData.user.id);
+    try {
+        // Verify the token and get the user
+        const { data: { user }, error: userError } = await supabase.auth.getUser(token);
 
-    // Update password through the authenticated session
-    const { data: updateData, error: updateError } = await supabaseAdmin.auth.updateUser({
-      password: newPassword
-    });
+        if (userError) {
+            console.error('Error getting user from token:', userError.message);
+            return res.status(401).json({ message: 'Invalid or expired token' });
+        }
 
-    if (updateError) {
-      console.error("Password update error:", updateError.message || updateError);
-      return res.status(400).json({ error: updateError.message || "Failed to update password." });
+        // The user is now authenticated. Update the password.
+        const { error: updateError } = await supabase.auth.admin.updateUserById(
+            user.id,
+            { password: newPassword }
+        );
+
+        if (updateError) {
+            console.error('Password update error:', updateError.message);
+            return res.status(500).json({ message: 'Failed to update password' });
+        }
+
+        return res.status(200).json({ message: 'Password reset successfully' });
+    } catch (error) {
+        console.error('Server error during password reset:', error.message);
+        return res.status(500).json({ message: 'Internal server error' });
     }
-
-    console.log("Password updated successfully for user:", sessionData.user.id);
-
-    res.status(200).json({ message: "Password has been reset successfully. Please log in with your new password." });
-  } catch (error) {
-    console.error("Reset password error:", error);
-    next(error);
-  }
-}
+};
