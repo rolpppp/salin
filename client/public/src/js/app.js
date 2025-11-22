@@ -1,12 +1,16 @@
 // register the service worker for pwa functionality
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(registration => {
-        console.log('serviceWorker registration successful with scope: ', registration.scope);
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration) => {
+        console.log(
+          "serviceWorker registration successful with scope: ",
+          registration.scope
+        );
       })
-      .catch(err => {
-        console.log('serviceWorker registration failed: ', err);
+      .catch((err) => {
+        console.log("serviceWorker registration failed: ", err);
       });
   });
 }
@@ -31,14 +35,17 @@ function router() {
 
   // handle reset password page first (before auth checks)
   // this includes both direct navigation and supabase recovery links with tokens
-  if (path.startsWith("#/reset-password") || (path.startsWith("#access_token") && path.includes("type=recovery"))) {
-    renderResetPasswordPage(app); 
+  if (
+    path.startsWith("#/reset-password") ||
+    (path.startsWith("#access_token") && path.includes("type=recovery"))
+  ) {
+    renderResetPasswordPage(app);
     return;
   }
 
   // allow access to public pages without authentication
   const publicPages = ["#/register", "#/forgot-password", "#/login"];
-  
+
   if (!token && !publicPages.includes(path)) {
     // if not logged in and not on a public page, force to login
     renderLoginPage(app);
@@ -46,7 +53,12 @@ function router() {
   }
 
   // if logged in and trying to access auth pages, redirect to dashboard
-  if (token && (path === "#/login" || path === "#/register" || path === "#/forgot-password")) {
+  if (
+    token &&
+    (path === "#/login" ||
+      path === "#/register" ||
+      path === "#/forgot-password")
+  ) {
     window.location.hash = "#/dashboard";
     return;
   }
@@ -71,10 +83,10 @@ function router() {
     case "#/categories":
       renderCategoriesPage(app);
       break;
-    case '#/forgot-password':
+    case "#/forgot-password":
       renderForgotPasswordPage(app);
       break;
-    case '#/reset-password':
+    case "#/reset-password":
       renderResetPasswordPage(app);
       break;
     default:
@@ -88,15 +100,18 @@ function router() {
 }
 
 // renders a generic error page with a retry button
-function renderErrorPage(app, message = 'an unexpected error occurred.') {
-    app.innerHTML = `
+export function renderErrorPage(
+  app,
+  message = "an unexpected error occurred."
+) {
+  app.innerHTML = `
         <div class="card error-page">
             <h2>oops! something went wrong.</h2>
             <p>${message}</p>
             <button id="retry-btn" class="btn btn-primary">retry</button>
         </div>
     `;
-    document.getElementById('retry-btn').addEventListener('click', router);
+  document.getElementById("retry-btn").addEventListener("click", router);
 }
 
 // listen for hash changes to navigate

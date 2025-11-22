@@ -3,6 +3,7 @@ const express = require("express");
 const path = require("path");
 const cors = require("cors");
 const os = require("os");
+const serverless = require('serverless-http');
 const app = express();
 
 // middleware
@@ -28,24 +29,4 @@ app.use((err, req, res, next) => {
   });
 });
 
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, "0.0.0.0", () => {
-  // OS-based log
-  const networkInterfaces = os.networkInterfaces();
-  const ips = [];
-  for (const name of Object.keys(networkInterfaces)) {
-    for (const iface of networkInterfaces[name]) {
-      if (iface.family === "IPv4" && !iface.internal) {
-        ips.push(iface.address);
-      }
-    }
-  }
-
-  console.log(`Server is running on port ${PORT}`);
-  if (ips.length > 0) {
-    console.log(`Access it from your phone at: http://${ips[0]}:${PORT}`);
-  }
-});
-
-module.exports = app;
+module.exports.handler = serverless(app);
