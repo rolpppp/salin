@@ -3,6 +3,8 @@ import { renderLoginPage, renderRegisterPage } from "./pages/auth/login.js";
 import { renderCategoriesPage } from "./pages/categories.js";
 import { renderDashboardPage } from "./pages/dashboard.js";
 import { renderTransactionsPage } from "./pages/transaction.js";
+import { renderForgotPasswordPage } from "./pages/auth/forgotPassword.js";
+import { renderResetPasswordPage } from "./pages/auth/resetPassword.js";
 
 const app = document.getElementById("app");
 
@@ -14,10 +16,26 @@ function router() {
   // Check if user is authenticated
   const token = localStorage.getItem("token");
 
-  if (!token && path !== "#/register") {
-    // If not logged in and not on register page, force to login
+  // Handle reset password page first (before auth checks)
+  // This includes both direct navigation and Supabase recovery links with tokens
+  if (path.startsWith("#/reset-password") || (path.startsWith("#access_token") && path.includes("type=recovery"))) {
+    renderResetPasswordPage(app); 
+    return;
+  }
+
+  // Allow access to public pages without authentication
+  const publicPages = ["#/register", "#/forgot-password", "#/login"];
+  
+  if (!token && !publicPages.includes(path)) {
+    // If not logged in and not on a public page, force to login
     console.log("Showing login page");
     renderLoginPage(app);
+    return;
+  }
+
+  // If logged in and trying to access auth pages, redirect to dashboard
+  if (token && (path === "#/login" || path === "#/register" || path === "#/forgot-password")) {
+    window.location.hash = "#/dashboard";
     return;
   }
 
@@ -40,6 +58,12 @@ function router() {
       break;
     case "#/categories":
       renderCategoriesPage(app);
+      break;
+    case '#/forgot-password':
+      renderForgotPasswordPage(app);
+      break;
+    case '#/reset-password':
+      renderResetPasswordPage(app);
       break;
     default:
       // If logged in and route is unknown, go to dashboard

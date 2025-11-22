@@ -23,6 +23,9 @@ function renderAuthForm(isLogin) {
             <label for="password">Password</label>
             <input type="password" id="password" class="form-control" minlength="6" required>
           </div>
+          <div class="auth-switch" style="margin-top: 1rem; text-align: right;">
+              <a href="#/forgot-password">Forgot Password?</a>
+          </div>
           <div class="auth-switch">
             ${switchText} <a href="${switchLink}">${switchAction}</a>
           </div>

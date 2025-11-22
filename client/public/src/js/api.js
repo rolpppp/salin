@@ -1,12 +1,14 @@
-// Detect if we're running locally or in production
 const isLocal = window.location.hostname === 'localhost' || 
                 window.location.hostname === '127.0.0.1' ||
-                window.location.hostname.includes('192.168');
+                window.location.hostname.startsWith('192.168.') ||
+                window.location.hostname.startsWith('10.') ||
+                window.location.hostname.startsWith('172.');
 
+// For local development, use the same host as the frontend (supports local network IPs)
 const API_BASE_URL = isLocal
-  ? 'http://localhost:3000/api'
-  : '/api';
-  
+  ? `http://${window.location.hostname}:3000/api`
+  : 'https://salin-six.vercel.app/api';
+
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
 
@@ -23,7 +25,8 @@ async function request(endpoint, options = {}) {
     const data = await response.json();
 
     if (!response.ok) {
-      throw new Error(data.error || "An unknown error occured.");
+      console.error('❌ API Error Response:', data);
+      throw new Error(data.error || data.details || "An unknown error occured.");
     }
 
     return data;
@@ -51,6 +54,20 @@ export function registerUser(email, password) {
   return request("/auth/register", {
     method: "POST",
     body: JSON.stringify({ email, password }),
+  });
+}
+
+export function forgotPassword(email) {
+    return request('/auth/forgot-password', {
+        method: 'POST',
+        body: JSON.stringify({ email }),
+    });
+}
+
+export function resetPassword(newPassword){
+  return request('/auth/reset-password', {
+        method: 'PUT',
+        body: JSON.stringify({ newPassword })
   });
 }
 
@@ -187,4 +204,20 @@ export function parseText(text) {
     headers: getAuthHeaders(),
     body: JSON.stringify({text})
   });
+}
+
+// --- Transactions Endpoints ---
+export function updateTransaction(id, transactionData) {
+    return request(`/transactions/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify(transactionData)
+    });
+}
+
+export function deleteTransaction(id) {
+    return request(`/transactions/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+    });
 }
