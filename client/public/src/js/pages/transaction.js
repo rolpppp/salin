@@ -58,23 +58,25 @@ export async function renderTransactionsPage(app) {
         app.innerHTML = `
             <div class="page-header">
                 <h1>All Transactions</h1>
-                <a href="#/dashboard" style="opacity: 0.5">Back to Dashboard</a>
+                <a href="#/dashboard">Back to Dashboard</a>
             </div>
             ${filterControlsHTML}
             <div class="card">
-                <table class="transactions-table">
-                    <thead>
-                        <tr>
-                            <th>Date</th>
-                            <th>Title</th>
-                            <th>Amount</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="transactions-list-container">
-                    
-                    </tbody>
-                </table>
+                <div class="transactions-table-wrapper">
+                    <table class="transactions-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Title</th>
+                                <th>Amount</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-list-container">
+                        
+                        </tbody>
+                    </table>
+                </div>
             </div>
         `;
 
@@ -149,6 +151,21 @@ function attachFilterListeners() {
 function renderTransactionsList(list) {
     const container = document.getElementById("transactions-list-container");
     container.innerHTML = "";
+
+    if (list.length === 0) {
+        container.innerHTML = `
+            <tr>
+                <td colspan="4" style="border: none; padding: 0;">
+                    <div class="empty-state">
+                        <div class="empty-state-icon">💸</div>
+                        <h3>No Transactions Found</h3>
+                        <p>Try adjusting your filters or add your first transaction.</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        return;
+    }
 
     list.forEach(t => {
         // determine the class based on transaction type
