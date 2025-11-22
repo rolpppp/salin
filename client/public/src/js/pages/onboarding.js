@@ -70,12 +70,12 @@ function attachOnboardingListeners() {
       .getElementById("account-type")
       .value.toLowerCase();
     const initialBalance = parseFloat(
-      document.getElementById("initial-balance").value,
+      document.getElementById("initial-balance").value
     );
 
     // validation
     if (!username) {
-      errorMessageDiv.textContent = "please enter your name.";
+      errorMessageDiv.textContent = "Please enter your name.";
       errorMessageDiv.style.display = "block";
       submitBtn.classList.remove("btn-loading");
       submitBtn.disabled = false;
@@ -83,7 +83,7 @@ function attachOnboardingListeners() {
     }
 
     if (!accountType) {
-      errorMessageDiv.textContent = "please select an account type.";
+      errorMessageDiv.textContent = "Please select an account type.";
       errorMessageDiv.style.display = "block";
       submitBtn.classList.remove("btn-loading");
       submitBtn.disabled = false;
@@ -91,7 +91,7 @@ function attachOnboardingListeners() {
     }
 
     if (isNaN(initialBalance)) {
-      errorMessageDiv.textContent = "please enter a valid initial balance.";
+      errorMessageDiv.textContent = "Please enter a valid initial balance.";
       errorMessageDiv.style.display = "block";
       submitBtn.classList.remove("btn-loading");
       submitBtn.disabled = false;
@@ -112,15 +112,15 @@ function attachOnboardingListeners() {
         balance: initialBalance,
       });
 
-      showToast("account setup complete! welcome to salin.", "success");
+      showToast("Account Setup Complete! Welcome to salin.", "success");
       setTimeout(() => {
         window.location.hash = "#/dashboard";
       }, 500);
     } catch (error) {
       errorMessageDiv.textContent =
-        error.message || "failed to complete onboarding.";
+        error.message || "Failed to complete onboarding.";
       errorMessageDiv.style.display = "block";
-      showToast(error.message || "failed to complete setup.", "error");
+      showToast(error.message || "Failed to complete setup.", "error");
       submitBtn.classList.remove("btn-loading");
       submitBtn.disabled = false;
     }
