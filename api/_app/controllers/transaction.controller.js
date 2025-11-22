@@ -6,9 +6,24 @@ exports.createTransaction = async (req, res, next) => {
   const { title, amount, type, date, description, account_id, category_id } =
     req.body;
 
+  console.log('📝 Creating transaction:', {
+    userId,
+    title,
+    amount,
+    type,
+    date,
+    description,
+    account_id,
+    category_id
+  });
+
   // validation
   if (!title || !amount || !type || !date || !account_id || !category_id) {
-    res.status(400).json({ error: "Required fields are missing" });
+    console.error('❌ Validation failed - missing fields');
+    return res.status(400).json({ 
+      error: "Required fields are missing",
+      received: { title, amount, type, date, account_id, category_id }
+    });
   }
 
   try {
@@ -27,16 +42,18 @@ exports.createTransaction = async (req, res, next) => {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('❌ Supabase error:', error);
+      throw error;
+    }
 
+    console.log('✅ Transaction created:', data);
     res.status(201).json({
       message: "Transaction created successfully.",
       transaction: data,
     });
   } catch (error) {
-    console.log(`error: ${error.message}`);
-    console.log("userId: ", userId);
-    console.log("req user: ", req.user);
+    console.error('❌ Create transaction error:', error);
     next(error);
   }
 };
@@ -118,24 +135,7 @@ exports.deleteTransaction = async (req, res, next) => {
 
   try {
     // verify if transaction belongs to the user
-    const { data: existingTransaction, error: findError } = await supabase
-      .from("transactions")
-      .select("id")
-      .eq("id", id)
-      .eq("user_id", userId)
-      .single();
-
-    if (findError || !existingTransaction) {
-      return res.status(404).json({ error: "Transaction not found" });
-    }
-
-    // delete transaction
-    const { data, error } = await supabase
-      .from("transactions")
-      .delete()
-      .eq("id", id)
-      .select()
-      .single();
+    const { error } = await supabase.rpc('delete_transaction_and_update_balance');
 
     if (error) throw error;
 
@@ -143,6 +143,9 @@ exports.deleteTransaction = async (req, res, next) => {
       .status(200)
       .json({ message: "Transaction deleted successfully"});
   } catch (error) {
+    if (error.message.includes('Transaction not found')) {
+            return res.status(404).json({ error: error.message });
+        }
     next(error);
   }
 };

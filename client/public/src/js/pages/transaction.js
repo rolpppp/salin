@@ -1,4 +1,4 @@
-import { getTransactions, getCategories, getAccounts } from "../api.js";
+import { getTransactions, getCategories, getAccounts, deleteTransaction} from "../api.js";
 
 let allTransactions = []; //store full list for filtering
 let categories = [];
@@ -66,6 +66,7 @@ export async function renderTransactionsPage(app) {
                             <th>Date</th>
                             <th>Title</th>
                             <th>Amount</th>
+                            <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody id="transactions-list-container">
@@ -88,7 +89,36 @@ function attachFilterListeners() {
     const categorySelect = document.getElementById("filter-category");
     const startDateInput = document.getElementById('filter-start-date');
     const endDateInput = document.getElementById('filter-end-date');
+    const tableBody = document.getElementById('transactions-list-container');
 
+    tableBody.addEventListener('click', async (e) => {
+        const target = e.target;
+        const row = target.closest('tr');
+        if (!row) return;
+
+        const transactionId = row.dataset.id;
+        
+        // --- DELETE LOGIC ---
+        if (target.classList.contains('delete-btn')) {
+            if (confirm('Are you sure you want to delete this transaction? This will also update your account balance.')) {
+                try {
+                    await deleteTransaction(transactionId);
+                    renderTransactionsPage(document.getElementById('app'));
+                } catch (error) {
+                    alert(error.message);
+                }
+            }
+        }
+
+        // --- EDIT LOGIC ---
+        if (target.classList.contains('edit-btn')) {
+            const transactionToEdit = allTransactions.find(t => t.id === transactionId);
+            if (transactionToEdit) {
+                const { openTransactionForm } = await import('../components/TransactionForm.js');
+                openTransactionForm(transactionToEdit.type, transactionToEdit);
+            }
+        }
+    });
     const applyFilters = () => {
         const filters = {
             search: searchInput.value.toLowerCase(),
@@ -119,21 +149,27 @@ function renderTransactionsList(list) {
     container.innerHTML = "";
 
     list.forEach(t => {
-        // Determine the class based on transaction type
+        // determine the class based on transaction type
         const typeClass = t.type === "income" ? "income" : "expense";
 
-        // Format amount neatly
+        // format amount neatly
         const formattedAmount = parseFloat(t.amount).toLocaleString("en-PH", {
         minimumFractionDigits: 2,
         maximumFractionDigits: 2
         });
 
         container.innerHTML += `
-            <tr>
+            <tr data-id="${t.id}">
                 <td>${t.date}</td>
                 <td>${t.title}</td>
                 <td class="amount ${typeClass}"> ${t.type === "income" ? "+" : "-"}₱${formattedAmount}
                 </td>
+                <td>
+                <div class="item-actions">
+                    <button class="edit-btn">✏️</button>
+                    <button class="delete-btn">🗑️</button>
+                </div>
+            </td>
             </tr>
         `;
     });
