@@ -30,7 +30,7 @@ async function renderList() {
                     <li class="management-list-item" data-id="${account.id}">
                         <div class="item-details">
                             <span class="name">${account.name}</span>
-                            <span class="meta">${account.type} - Balance: ₱${parseFloat(account.balance).toFixed(2)}</span>
+                            <span class="meta" data-type="${account.type.toLowerCase()}">${account.type} - Balance: ₱${parseFloat(account.balance).toFixed(2)}</span>
                         </div>
                         <div class="item-actions">
                             <button class="edit-btn">
@@ -49,7 +49,7 @@ async function renderList() {
                             </button>
                         </div>
                     </li>
-                `,
+                `
                   )
                   .join("")}
             </ul>
@@ -65,6 +65,14 @@ function openAccountForm(account = null) {
   const isEdit = account !== null;
   const title = isEdit ? "Edit Account" : "Add New Account";
 
+  // Check if the account type is one of the predefined ones
+  const predefinedTypes = ["cash", "bank", "e-wallet", "credit_card"];
+  const isCustomType =
+    isEdit &&
+    account.type &&
+    !predefinedTypes.includes(account.type.toLowerCase());
+  const selectedType = isCustomType ? "custom" : isEdit ? account.type : "";
+
   const formContent = `
         <form id="account-form">
             <div class="form-group">
@@ -72,8 +80,22 @@ function openAccountForm(account = null) {
                 <input type="text" id="name" class="form-control" value="${isEdit ? account.name : ""}" required>
             </div>
             <div class="form-group">
-                <label for="type">Account Type</label>
-                <input type="text" id="type" class="form-control" value="${isEdit ? account.type : ""}" placeholder="e.g., Checking, Savings, E-Wallet" required>
+                <label for="type-select">Account Type</label>
+                <select id="type-select" class="form-control" required>
+                    <option value="">Select account type...</option>
+                    <option value="cash" ${selectedType === "cash" ? "selected" : ""}>Cash</option>
+                    <option value="bank" ${selectedType === "bank" ? "selected" : ""}>Bank Account</option>
+                    <option value="e-wallet" ${selectedType === "e-wallet" ? "selected" : ""}>E-Wallet (GCash, PayMaya, etc.)</option>
+                    <option value="credit_card" ${selectedType === "credit_card" ? "selected" : ""}>Credit Card</option>
+                    <option value="custom" ${selectedType === "custom" ? "selected" : ""}>Custom...</option>
+                </select>
+            </div>
+            <div class="form-group" id="custom-type-group" style="display: ${isCustomType ? "block" : "none"};">
+                <label for="custom-type">Custom Account Type</label>
+                <input type="text" id="custom-type" class="form-control" value="${isCustomType ? account.type : ""}" placeholder="e.g., Savings, Investment, Checking">
+                <small style="color: var(--text-light-color); font-size: var(--font-size-sm); margin-top: var(--space-xs); display: block;">
+                    Enter your custom account type name
+                </small>
             </div>
             <div class="form-group">
                 <label for="balance">Initial Balance</label>
@@ -85,14 +107,43 @@ function openAccountForm(account = null) {
 
   showModal(title, formContent);
 
+  // Show/hide custom type input based on selection
+  const typeSelect = document.getElementById("type-select");
+  const customTypeGroup = document.getElementById("custom-type-group");
+  const customTypeInput = document.getElementById("custom-type");
+
+  typeSelect.addEventListener("change", (e) => {
+    if (e.target.value === "custom") {
+      customTypeGroup.style.display = "block";
+      customTypeInput.required = true;
+    } else {
+      customTypeGroup.style.display = "none";
+      customTypeInput.required = false;
+      customTypeInput.value = "";
+    }
+  });
+
   document
     .getElementById("account-form")
     .addEventListener("submit", async (e) => {
       e.preventDefault();
+
+      const selectedTypeValue = typeSelect.value;
+      const accountType =
+        selectedTypeValue === "custom"
+          ? customTypeInput.value.trim()
+          : selectedTypeValue;
+
+      // Validation for custom type
+      if (selectedTypeValue === "custom" && !accountType) {
+        showToast("Please enter a custom account type", "error");
+        return;
+      }
+
       const formData = {
         user_id: getUserID,
         name: document.getElementById("name").value,
-        type: document.getElementById("type").value,
+        type: accountType,
         balance: parseFloat(document.getElementById("balance").value),
       };
 
@@ -133,7 +184,7 @@ function attachListeners() {
       if (target.classList.contains("delete-btn")) {
         if (
           confirm(
-            "Are you sure you want to delete this account? This cannot be undone.",
+            "Are you sure you want to delete this account? This cannot be undone."
           )
         ) {
           try {

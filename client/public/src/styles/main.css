@@ -879,6 +879,7 @@ select.form-control {
   padding: var(--space-md);
   background-color: var(--card-bg-color);
   border: 1px solid var(--border-color);
+  border-left: 4px solid var(--primary-color);
   border-radius: var(--border-radius-lg);
   margin-bottom: var(--space-md);
   transition: all var(--transition-base);
@@ -887,6 +888,7 @@ select.form-control {
 .management-list-item:hover {
   box-shadow: var(--box-shadow-md);
   transform: translateY(-2px);
+  border-left-color: var(--primary-color-dark);
 }
 
 .item-details {
@@ -899,11 +901,25 @@ select.form-control {
   font-weight: var(--font-weight-semibold);
   font-size: var(--font-size-base);
   color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.item-details .name::before {
+  content: "";
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: var(--border-radius-full);
+  background: var(--primary-color);
+  flex-shrink: 0;
 }
 
 .item-details .meta {
   font-size: var(--font-size-sm);
   color: var(--text-light-color);
+  margin-left: 16px;
 }
 
 .item-actions {
@@ -1085,4 +1101,67 @@ select.form-control {
 /* Smooth scroll */
 html {
   scroll-behavior: smooth;
+}
+
+/* ==========================================================================
+   ACCOUNT & CATEGORY COLORS
+   ========================================================================== */
+
+/* Account type colors - Cash (green) */
+.management-list-item:has(.meta[data-type*="cash"]) {
+  border-left-color: #10b981;
+}
+
+.management-list-item:has(.meta[data-type*="cash"]) .name::before {
+  background: #10b981;
+}
+
+/* Account type colors - Bank (blue) */
+.management-list-item:has(.meta[data-type*="bank"]) {
+  border-left-color: #3b82f6;
+}
+
+.management-list-item:has(.meta[data-type*="bank"]) .name::before {
+  background: #3b82f6;
+}
+
+/* Account type colors - E-Wallet (purple) */
+.management-list-item:has(.meta[data-type*="wallet"]) {
+  border-left-color: #8b5cf6;
+}
+
+.management-list-item:has(.meta[data-type*="wallet"]) .name::before {
+  background: #8b5cf6;
+}
+
+/* Account type colors - Credit Card (red) */
+.management-list-item:has(.meta[data-type*="credit"]) {
+  border-left-color: #ef4444;
+}
+
+.management-list-item:has(.meta[data-type*="credit"]) .name::before {
+  background: #ef4444;
+}
+
+/* Category type colors - expense categories (orange) */
+#expense-categories-list .management-list-item {
+  border-left-color: #f97316;
+}
+
+#expense-categories-list .management-list-item .name::before {
+  background: #f97316;
+}
+
+/* Category type colors - income categories (green) */
+#income-categories-list .management-list-item {
+  border-left-color: #22c55e;
+}
+
+#income-categories-list .management-list-item .name::before {
+  background: #22c55e;
+}
+
+/* Add a subtle background tint on hover */
+.management-list-item:hover {
+  background: linear-gradient(to right, rgba(99, 102, 241, 0.03), transparent);
 }
