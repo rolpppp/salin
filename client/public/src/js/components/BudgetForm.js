@@ -57,7 +57,7 @@ export function openBudgetForm(currentBudget = {}) {
       hideModal();
       window.dispatchEvent(new CustomEvent("transactionsUpdated"));
     } catch (error) {
-      showToast(error.message, 'error');
+      showToast(error.message, "error");
 
       // Reset button state on error
       submitBtn.classList.remove("btn-loading");
