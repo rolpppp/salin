@@ -1,6 +1,7 @@
 import { getDashboardData } from "../api.js";
 import { openTransactionForm } from "../components/TransactionForm.js";
 import { openBudgetForm } from "../components/BudgetForm.js";
+import { openParseReviewModal } from "../components/ParseReview.js";
 
 let currentDashboardData = {};
 
@@ -127,5 +128,14 @@ function attachDashboardListeners() {
   const budgetCard = document.getElementById('budget-card');
     budgetCard.addEventListener("click", () => {
         openBudgetForm(currentDashboardData.budget);
+    });
+
+  const parseBtn = document.getElementById('parse-btn');
+    parseBtn.addEventListener('click', () => {
+        const text = document.getElementById('paste-area').value;
+        if (text.trim()) {
+            console.log("Parse button clicked")
+            openParseReviewModal(text);
+        }
     });
 }
