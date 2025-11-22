@@ -6,7 +6,7 @@
   "scripts": {
     "start": "node api/index.js",
     "server": "nodemon api/index.js",
-    "client": "live-server client/public --proxy=/api:http://localhost:3000",
+    "client": "npx live-server client/public --proxy=/api:http://localhost:3000",
     "dev": "npm run server & npm run client"
   },
   "repository": {
@@ -20,7 +20,7 @@
     "url": "https://github.com/rolpppp/salin/issues"
   },
   "homepage": "https://github.com/rolpppp/salin#readme",
-  "dependencies": { 
+  "dependencies": {
     "@google/genai": "^1.29.0",
     "@supabase/supabase-js": "^2.78.0",
     "bcrypt": "^6.0.0",

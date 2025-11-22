@@ -1,5 +1,7 @@
+import { renderErrorPage } from "../app.js";
 import { getCategories, getCategoriesByType, createCategory, updateCategory, deleteCategory, getUserID } from '../api.js';
 import { showModal, hideModal } from '../components/Modal.js';
+import { showToast } from '../components/Toast.js';
 
 export async function renderCategoriesPage(app) {
     app.innerHTML = '<div class="loading-spinner"></div>';
@@ -33,7 +35,7 @@ async function renderList() {
         `;
         attachListeners();
     } catch (error) {
-        app.innerHTML = `<p class="error-message">Could not load categories.</p>`;
+        renderErrorPage(app, error.message);
     }
 }
 
@@ -76,22 +78,22 @@ function openCategoryForm(category = null) {
     
     document.getElementById('category-form').addEventListener('submit', async (e) => {
         e.preventDefault();
-        console.log(document.getElementById("type").value)
         const formData = {
             name: document.getElementById('name').value,
             type: document.getElementById('type').value
         };
-        console.log(formData);
         try {
             if (isEdit) {
                 await updateCategory(category.id, { name: formData.name, type: formData.type });
+                showToast('Category updated successfully');
             } else {
                 await createCategory(formData);
+                showToast('Category created successfully');
             }
             hideModal();
             renderList();
         } catch (error) {
-            alert(error.message);
+            showToast(error.message, 'error');
         }
     });
 }
@@ -112,12 +114,12 @@ function attachListeners() {
                 if (confirm('Are you sure you want to delete this category?')) {
                     try {
                         await deleteCategory(categoryId);
+                        showToast('Category deleted successfully');
                         renderList();
                     } catch (error) {
-                        alert(error.message);
+                        showToast(error.message, 'error');
                     }
                 }
-                alert("Category deleted successfully");
             }
             
             if (target.classList.contains('edit-btn')) {

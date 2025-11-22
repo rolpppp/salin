@@ -1,6 +1,7 @@
 // client/src/js/pages/accounts.js
 import { getAccounts, createAccount, updateAccount, deleteAccount, getUserID } from '../api.js';
 import { showModal, hideModal } from '../components/Modal.js';
+import { showToast } from '../components/Toast.js';
 
 export async function renderAccountsPage(app) {
     app.innerHTML = '<div class="loading-spinner"></div>';
@@ -75,13 +76,15 @@ function openAccountForm(account = null) {
             if (isEdit) {
                 // update only name and type
                 await updateAccount(account.id, { name: formData.name, type: formData.type });
+                showToast('Account updated successfully');
             } else {
                 await createAccount(formData);
+                showToast('Account created successfully');
             }
             hideModal();
             renderList(); 
         } catch (error) {
-            alert(error.message);
+            showToast(error.message, 'error');
         }
     });
 }
@@ -100,9 +103,10 @@ function attachListeners() {
             if (confirm('Are you sure you want to delete this account? This cannot be undone.')) {
                 try {
                     await deleteAccount(accountId);
+                    showToast('Account deleted successfully');
                     renderList();
                 } catch (error) {
-                    alert(error.message);
+                    showToast(error.message, 'error');
                 }
             }
         }

@@ -1,3 +1,5 @@
+import { renderErrorPage } from "../app.js";
+import { showToast } from "../components/Toast.js";
 import { getTransactions, getCategories, getAccounts, deleteTransaction} from "../api.js";
 
 let allTransactions = []; //store full list for filtering
@@ -79,8 +81,7 @@ export async function renderTransactionsPage(app) {
         renderTransactionsList(allTransactions);
         attachFilterListeners();
     } catch (error) {
-        console.error("Failed to render transactions page: ", error);
-        app.innerHTML = `<p class="error-message">Could not load transactions.</p>`;
+        renderErrorPage(app, error.message);
     }
 }
 
@@ -103,9 +104,10 @@ function attachFilterListeners() {
             if (confirm('Are you sure you want to delete this transaction? This will also update your account balance.')) {
                 try {
                     await deleteTransaction(transactionId);
+                    showToast('Transaction deleted successfully');
                     renderTransactionsPage(document.getElementById('app'));
                 } catch (error) {
-                    alert(error.message);
+                    showToast(error.message, 'error');
                 }
             }
         }

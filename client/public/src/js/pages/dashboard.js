@@ -1,3 +1,4 @@
+import { renderErrorPage } from "../app.js";
 import { getDashboardData } from "../api.js";
 import { openTransactionForm } from "../components/TransactionForm.js";
 import { openBudgetForm } from "../components/BudgetForm.js";
@@ -9,9 +10,7 @@ export async function renderDashboardPage(app) {
   try {
     const data = await getDashboardData();
     currentDashboardData = data;
-    console.log(data.budget.id);
     const user = JSON.parse(localStorage.getItem("user"));
-    console.log("Username: ", user);
     const budgetPercent =
       data.budget.amount > 0
         ? (data.budget.spent / data.budget.amount) * 100
@@ -78,9 +77,7 @@ export async function renderDashboardPage(app) {
     renderRecentTransactions(data.recentTransactions);
     attachDashboardListeners();
   } catch (error) {
-    console.error("Failed to render dashboard: ", error);
-    localStorage.clear();
-    window.location.hash = "#/login";
+    renderErrorPage(app, error.message);
   }
 }
 
@@ -134,7 +131,6 @@ function attachDashboardListeners() {
     parseBtn.addEventListener('click', () => {
         const text = document.getElementById('paste-area').value;
         if (text.trim()) {
-            console.log("Parse button clicked")
             openParseReviewModal(text);
         }
     });
