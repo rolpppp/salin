@@ -1,6 +1,6 @@
 // client/public/src/js/pages/onboarding.js
 import { showToast } from "../components/Toast.js";
-import { getUserID, updateAccount, createAccount } from "../api.js";
+import { getUserID, updateUser, createAccount } from "../api.js";
 
 // renders the onboarding page, which collects user details and initial account information
 export function renderOnboardingPage(app) {
@@ -99,10 +99,8 @@ function attachOnboardingListeners() {
     }
 
     try {
-      // store username in localStorage for now (can be used in dashboard)
-      const user = JSON.parse(localStorage.getItem("user") || "{}");
-      user.name = username;
-      localStorage.setItem("user", JSON.stringify(user));
+      // update user profile (username)
+      await updateUser(username);
 
       // create the initial account with user-selected type
       const accountName = getAccountName(accountType);
@@ -112,7 +110,7 @@ function attachOnboardingListeners() {
         balance: initialBalance,
       });
 
-      showToast("Account Setup Complete! Welcome to salin.", "success");
+      showToast("Account setup complete! Welcome to salin.", "success");
       setTimeout(() => {
         window.location.hash = "#/dashboard";
       }, 500);

@@ -1,5 +1,5 @@
 import { renderErrorPage } from "../app.js";
-import { getDashboardData } from "../api.js";
+import { getDashboardData, getUser } from "../api.js";
 import { openTransactionForm } from "../components/TransactionForm.js";
 import { openBudgetForm } from "../components/BudgetForm.js";
 import { openParseReviewModal } from "../components/ParseReview.js";
@@ -8,10 +8,9 @@ let currentDashboardData = {};
 
 export async function renderDashboardPage(app) {
   try {
-    const data = await getDashboardData();
+    const [data, user] = await Promise.all([getDashboardData(), getUser()]);
     currentDashboardData = data;
-    const user = JSON.parse(localStorage.getItem("user"));
-    const displayName = user.name || user.email.split("@")[0];
+    const displayName = user.user_metadata.name || user.email.split("@")[0];
     const budgetPercent =
       data.budget.amount > 0
         ? (data.budget.spent / data.budget.amount) * 100

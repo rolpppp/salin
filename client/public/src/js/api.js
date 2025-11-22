@@ -72,6 +72,22 @@ export function resetPassword(newPassword, token) {
   });
 }
 
+// --- User Endpoints ---
+export function getUser() {
+    return request("/user", {
+        method: "GET",
+        headers: getAuthHeaders(),
+    });
+}
+
+export function updateUser(username) {
+  return request("/user", {
+    method: "PUT",
+    headers: getAuthHeaders(),
+    body: JSON.stringify({ username }),
+  });
+}
+
 // --- Getting User ID ---
 export function getUserID() {
   return localStorage.getItem("user_id");
