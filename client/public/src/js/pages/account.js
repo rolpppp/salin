@@ -21,7 +21,7 @@ async function renderList() {
                     <li class="management-list-item" data-id="${account.id}">
                         <div class="item-details">
                             <span class="name">${account.name}</span>
-                            <span class="meta">${account.type} - Balance: $${parseFloat(account.balance).toFixed(2)}</span>
+                            <span class="meta">${account.type} - Balance: ₱${parseFloat(account.balance).toFixed(2)}</span>
                         </div>
                         <div class="item-actions">
                             <button class="edit-btn">✏️</button>
