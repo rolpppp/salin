@@ -10,7 +10,7 @@ export async function renderDashboardPage(app) {
   try {
     const [data, user] = await Promise.all([getDashboardData(), getUser()]);
     currentDashboardData = data;
-    const displayName = user.user_metadata.name || user.email.split("@")[0];
+    const displayName = user.username || user.email.split("@")[0];
     const budgetPercent =
       data.budget.amount > 0
         ? (data.budget.spent / data.budget.amount) * 100
@@ -34,7 +34,7 @@ export async function renderDashboardPage(app) {
 
       <div class="card balance-card">
         <h2>Total Balance</h2>
-        <p class="balance">${data.totalBalance.toFixed(2)}</p>
+        <p class="balance">₱${data.totalBalance.toFixed(2)}</p>
       </div>
 
       <div id="budget-card" class="card budget-card" style="cursor: pointer;">
