@@ -6,17 +6,6 @@ exports.createTransaction = async (req, res, next) => {
   const { title, amount, type, date, description, account_id, category_id } =
     req.body;
 
-  console.log('📝 Creating transaction:', {
-    userId,
-    title,
-    amount,
-    type,
-    date,
-    description,
-    account_id,
-    category_id
-  });
-
   // validation
   if (!title || !amount || !type || !date || !account_id || !category_id) {
     console.error('❌ Validation failed - missing fields');
