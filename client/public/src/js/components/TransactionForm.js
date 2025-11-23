@@ -5,6 +5,7 @@ import {
   createTransaction,
   updateTransaction,
 } from "../api.js";
+import { formatCurrency } from "../utils.js";
 
 export async function openTransactionForm(type, transactionToEdit = null) {
   const isEdit = transactionToEdit !== null;
@@ -51,7 +52,7 @@ export async function openTransactionForm(type, transactionToEdit = null) {
                             isEdit && c.id === transactionToEdit.category_id
                               ? "selected"
                               : ""
-                          }>${c.name}</option>`,
+                          }>${c.name}</option>`
                       )
                       .join("")}
                 </select>
@@ -68,9 +69,7 @@ export async function openTransactionForm(type, transactionToEdit = null) {
                            isEdit && a.id === transactionToEdit.account_id
                              ? "selected"
                              : ""
-                         }>${a.name} (₱${parseFloat(a.balance).toFixed(
-                           2,
-                         )})</option>`,
+                         }>${a.name} (₱${formatCurrency(a.balance)})</option>`
                      )
                      .join("")}
                 </select>

@@ -8,6 +8,7 @@ import {
 } from "../api.js";
 import { showModal, hideModal } from "../components/Modal.js";
 import { showToast } from "../components/Toast.js";
+import { formatCurrency } from "../utils.js";
 
 export async function renderAccountsPage(app) {
   app.innerHTML = '<div class="loading-spinner"></div>';
@@ -30,7 +31,7 @@ async function renderList() {
                     <li class="management-list-item" data-id="${account.id}">
                         <div class="item-details">
                             <span class="name">${account.name}</span>
-                            <span class="meta" data-type="${account.type.toLowerCase()}">${account.type} - Balance: ₱${parseFloat(account.balance).toFixed(2)}</span>
+                            <span class="meta" data-type="${account.type.toLowerCase()}">${account.type} - Balance: ₱${formatCurrency(account.balance)}</span>
                         </div>
                         <div class="item-actions">
                             <button class="edit-btn">
@@ -181,25 +182,43 @@ function attachListeners() {
 
       const accountId = listItem.dataset.id;
 
-      if (target.classList.contains("delete-btn")) {
-        if (
-          confirm(
-            "Are you sure you want to delete this account? This cannot be undone."
-          )
-        ) {
-          try {
-            await deleteAccount(accountId);
-            showToast("Account deleted successfully");
-            renderList();
-          } catch (error) {
-            showToast(error.message, "error");
-          }
-        }
+      if (target.closest(".delete-btn")) {
+        const deleteContent = `
+          <p style="margin-bottom: var(--space-lg); text-align: center;">
+            Are you sure you want to delete this account? This action cannot be undone.
+          </p>
+          <div style="display: flex; gap: var(--space-md); justify-content: center;">
+            <button id="confirm-delete-btn" class="btn btn-danger">Delete</button>
+            <button id="cancel-delete-btn" class="btn btn-secondary">Cancel</button>
+          </div>
+        `;
+
+        showModal("Delete Account", deleteContent);
+
+        document
+          .getElementById("confirm-delete-btn")
+          .addEventListener("click", async () => {
+            try {
+              await deleteAccount(accountId);
+              showToast("Account deleted successfully");
+              hideModal();
+              renderList();
+            } catch (error) {
+              showToast(error.message, "error");
+              hideModal();
+            }
+          });
+
+        document
+          .getElementById("cancel-delete-btn")
+          .addEventListener("click", () => {
+            hideModal();
+          });
       }
 
-      if (target.classList.contains("edit-btn")) {
+      if (target.closest(".edit-btn")) {
         const accounts = await getAccounts();
-        const accountToEdit = accounts.find((a) => a.id === accountId);
+        const accountToEdit = accounts.data.find((a) => a.id === accountId);
         openAccountForm(accountToEdit);
       }
     });

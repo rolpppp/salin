@@ -6,22 +6,29 @@ exports.getUser = async (req, res, next) => {
   const userId = req.user.id;
 
   try {
-    // get user from auth
     const {
       data: { user },
-      error,
+      error: authError,
     } = await supabase.auth.admin.getUserById(userId);
 
-    if (error) throw error;
+    if (authError) throw authError;
 
-    const { data: usersData, error: usersError } = await supabase
+    // Get username from public.users table
+    const { data: publicUser, error: publicError } = await supabase
       .from("users")
       .select("username")
       .eq("id", userId)
       .single();
 
-    if (usersError && usersError.code !== "PGRST116") throw usersError;
-    res.status(200).json(user);
+    if (publicError && publicError.code !== "PGRST116") throw publicError;
+
+    // Combine auth user with public user data
+    const userData = {
+      ...user,
+      username: publicUser?.username || null,
+    };
+
+    res.status(200).json(userData);
   } catch (error) {
     next(error);
   }
@@ -37,35 +44,14 @@ exports.updateUser = async (req, res, next) => {
   }
 
   try {
-    const { data: existingData, error: checkError } = await supabase
+    // Update username in public.users table
+    const { data, error } = await supabase
       .from("users")
-      .select("username")
-      .eq("id", userId)
+      .upsert({ id: userId, username: username }, { onConflict: "id" })
+      .select()
       .single();
 
-    if (checkError) throw checkError;
-
-    let result;
-    if (existingData) {
-      const { data, error } = await supabase
-        .from("users")
-        .update({ username })
-        .eq("id", userId)
-        .select()
-        .single();
-
-      if (error) throw error;
-    } else {
-      // insert new record
-      const { data, error } = await supabase
-        .from("users")
-        .insert({ id: userId, username })
-        .select()
-        .single();
-
-      if (error) throw error;
-      result = data;
-    }
+    if (error) throw error;
 
     res.status(200).json({ message: "user updated successfully", data });
   } catch (error) {

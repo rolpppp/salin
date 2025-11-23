@@ -136,19 +136,41 @@ function attachListeners() {
 
       const categoryId = listItem.dataset.id;
 
-      if (target.classList.contains("delete-btn")) {
-        if (confirm("Are you sure you want to delete this category?")) {
-          try {
-            await deleteCategory(categoryId);
-            showToast("Category deleted successfully");
-            renderList();
-          } catch (error) {
-            showToast(error.message, "error");
-          }
-        }
+      if (target.closest(".delete-btn")) {
+        const deleteContent = `
+          <p style="margin-bottom: var(--space-lg); text-align: center;">
+            Are you sure you want to delete this category? This action cannot be undone.
+          </p>
+          <div style="display: flex; gap: var(--space-md); justify-content: center;">
+            <button id="confirm-delete-btn" class="btn btn-danger">Delete</button>
+            <button id="cancel-delete-btn" class="btn btn-secondary">Cancel</button>
+          </div>
+        `;
+
+        showModal("Delete Category", deleteContent);
+
+        document
+          .getElementById("confirm-delete-btn")
+          .addEventListener("click", async () => {
+            try {
+              await deleteCategory(categoryId);
+              showToast("Category deleted successfully");
+              hideModal();
+              renderList();
+            } catch (error) {
+              showToast(error.message, "error");
+              hideModal();
+            }
+          });
+
+        document
+          .getElementById("cancel-delete-btn")
+          .addEventListener("click", () => {
+            hideModal();
+          });
       }
 
-      if (target.classList.contains("edit-btn")) {
+      if (target.closest(".edit-btn")) {
         const categories = await getCategories();
         const categoryToEdit = categories.data.find((c) => c.id == categoryId);
         openCategoryForm(categoryToEdit);
