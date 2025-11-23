@@ -54,7 +54,7 @@ export async function renderDashboardPage(app) {
       getAccounts(),
     ]);
     currentDashboardData = data;
-    const displayName = user.username || user.email.split("@")[0];
+    const displayName = user.user_metadata.name || user.email.split("@")[0];
     const budgetPercent =
       data.budget.amount > 0
         ? (data.budget.spent / data.budget.amount) * 100
