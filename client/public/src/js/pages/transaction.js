@@ -134,7 +134,9 @@ function attachFilterListeners() {
     const transactionId = row.dataset.id;
 
     // --- DELETE LOGIC ---
-    if (target.classList.contains("delete-btn")) {
+    // Check if delete button or its child elements were clicked
+    const deleteBtn = target.closest(".delete-btn");
+    if (deleteBtn) {
       const transactionTitle = row.querySelector(".management-list-item") 
         ? row.querySelector(".name")?.textContent 
         : row.querySelector("td:nth-child(2)")?.textContent || "this transaction";
@@ -171,7 +173,9 @@ function attachFilterListeners() {
     }
 
     // --- EDIT LOGIC ---
-    if (target.classList.contains("edit-btn")) {
+    // Check if edit button or its child elements were clicked
+    const editBtn = target.closest(".edit-btn");
+    if (editBtn) {
       const transactionToEdit = allTransactions.find(
         (t) => t.id === transactionId
       );
