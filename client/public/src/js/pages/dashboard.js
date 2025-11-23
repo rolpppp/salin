@@ -1,20 +1,65 @@
 import { renderErrorPage } from "../app.js";
-import { getDashboardData, getUser } from "../api.js";
+import { getDashboardData, getUser, getAccounts } from "../api.js";
 import { openTransactionForm } from "../components/TransactionForm.js";
 import { openBudgetForm } from "../components/BudgetForm.js";
 import { openParseReviewModal } from "../components/ParseReview.js";
 
 let currentDashboardData = {};
 
+// Map account types to SVG icon filenames
+function getAccountIcon(type) {
+  const typeMap = {
+    cash: "cash.svg",
+    bank: "bank.svg",
+    "e-wallet": "e-wallet.svg",
+    credit_card: "credit_card.svg",
+  };
+
+  // Check for exact match first
+  if (typeMap[type.toLowerCase()]) {
+    return typeMap[type.toLowerCase()];
+  }
+
+  // Check for substring matches for custom types
+  const lowerType = type.toLowerCase();
+  if (lowerType.includes("cash")) return "cash.svg";
+  if (lowerType.includes("bank")) return "bank.svg";
+  if (lowerType.includes("wallet") || lowerType.includes("e-wallet"))
+    return "e-wallet.svg";
+  if (lowerType.includes("credit")) return "credit_card.svg";
+
+  // Default to cash icon
+  return "cash.svg";
+}
+
+// Get color gradient for account type
+function getAccountColor(type) {
+  const lowerType = type.toLowerCase();
+  if (lowerType.includes("cash"))
+    return "linear-gradient(135deg, #10b981 0%, #059669 100%)";
+  if (lowerType.includes("bank"))
+    return "linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)";
+  if (lowerType.includes("wallet"))
+    return "linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)";
+  if (lowerType.includes("credit"))
+    return "linear-gradient(135deg, #ef4444 0%, #dc2626 100%)";
+  return "linear-gradient(135deg, #10b981 0%, #059669 100%)"; // default
+}
+
 export async function renderDashboardPage(app) {
   try {
-    const [data, user] = await Promise.all([getDashboardData(), getUser()]);
+    const [data, user, accounts] = await Promise.all([
+      getDashboardData(),
+      getUser(),
+      getAccounts(),
+    ]);
     currentDashboardData = data;
-    const displayName = user.username || user.email.split("@")[0];
+    const displayName = user.user_metadata.name || user.email.split("@")[0];
     const budgetPercent =
       data.budget.amount > 0
         ? (data.budget.spent / data.budget.amount) * 100
         : 0;
+    const totalBalanceValue = data.totalBalance;
 
     app.innerHTML = `
       <header class="dashboard-header">
@@ -33,8 +78,36 @@ export async function renderDashboardPage(app) {
       </header>
 
       <div class="card balance-card">
-        <h2>Total Balance</h2>
-        <p class="balance">₱${data.totalBalance.toFixed(2)}</p>
+        <div class="total-balance-display">
+          <h2>Total Balance</h2>
+          <p class="balance">₱${totalBalanceValue.toFixed(2)}</p>
+        </div>
+        <div class="accounts-horizontal-scroller" id="account-cards-container">
+          ${
+            accounts.data && accounts.data.length > 0
+              ? accounts.data
+                  .map(
+                    (account) => `
+            <div class="account-card" style="background: ${getAccountColor(
+              account.type
+            )}">
+              <div class="account-card-icon">
+                <img src="/assets/svg/${getAccountIcon(
+                  account.type
+                )}" alt="${account.type}">
+              </div>
+              <div class="account-card-info">
+                <p class="account-card-balance">₱${parseFloat(
+                  account.balance
+                ).toFixed(2)}</p>
+              </div>
+            </div>
+          `
+                  )
+                  .join("")
+              : '<div class="empty-accounts"><p>no accounts yet. <a href="#/accounts">add your first account</a></p></div>'
+          }
+        </div>
       </div>
 
       <div id="budget-card" class="card budget-card" style="cursor: pointer;">
@@ -51,7 +124,7 @@ export async function renderDashboardPage(app) {
 
       <div class="card">
         <h2>Quick Add Transaction</h2>
-        <textarea id="paste-area" class="form-control" rows="3" placeholder="Freely write/paste your transactions here(e.g., Lunch at karenderya ₱55.00 and transpo 20 pesos yesterday)"></textarea>
+        <textarea id="paste-area" class="form-control" rows="3" placeholder="Freely write/paste your transactions here (e.g., Lunch at karenderya ₱55.00 and transpo 20 pesos yesterday)"></textarea>
         <button id="parse-btn" class="btn" style="width: 100%; margin-top: var(--space-sm);">Parse Note</button>
       </div>
 
@@ -74,7 +147,7 @@ export async function renderDashboardPage(app) {
       renderDashboardPage(app);
     });
 
-    renderRecentTransactions(data.recentTransactions);
+    renderRecentTransactions(data.transactions);
     attachDashboardListeners();
   } catch (error) {
     renderErrorPage(app, error.message);
@@ -83,7 +156,12 @@ export async function renderDashboardPage(app) {
 
 function renderRecentTransactions(transactions) {
   const list = document.getElementById("recent-transactions-list");
-  if (transactions.length == 0) {
+  if (
+    !transactions ||
+    !transactions.data ||
+    !Array.isArray(transactions.data) ||
+    transactions.data.length === 0
+  ) {
     list.innerHTML = `
       <div class="empty-state">
         <div class="empty-state-icon">📊</div>
@@ -105,7 +183,7 @@ function renderRecentTransactions(transactions) {
     return;
   }
 
-  list.innerHTML = transactions
+  list.innerHTML = data.transactions
     .map(
       (t) => `
     <li>
