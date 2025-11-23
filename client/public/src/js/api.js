@@ -24,7 +24,7 @@ async function request(endpoint, options = {}) {
 
     if (!response.ok) {
       throw new Error(
-        data.error || data.details || "An unknown error occured.",
+        data.error || data.details || "An unknown error occured."
       );
     }
 
@@ -72,12 +72,32 @@ export function resetPassword(newPassword, token) {
   });
 }
 
+export async function googleSignIn() {
+  const response = await request("/auth/google", {
+    method: "GET",
+  });
+  return response;
+}
+
+export async function handleOAuthCallback(access_token, refresh_token) {
+  const response = await request("/auth/oauth/callback", {
+    method: "POST",
+    body: JSON.stringify({ access_token, refresh_token }),
+  });
+
+  if (response.user) {
+    localStorage.setItem("user_id", response.user.id);
+  }
+
+  return response;
+}
+
 // --- User Endpoints ---
 export function getUser() {
-    return request("/user", {
-        method: "GET",
-        headers: getAuthHeaders(),
-    });
+  return request("/user", {
+    method: "GET",
+    headers: getAuthHeaders(),
+  });
 }
 
 export function updateUser(username) {

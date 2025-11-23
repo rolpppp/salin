@@ -391,6 +391,47 @@ select.form-control {
   text-decoration: underline;
 }
 
+.divider {
+  display: flex;
+  align-items: center;
+  margin: var(--space-lg) 0;
+  color: var(--text-secondary-color);
+  font-size: var(--font-size-sm);
+}
+
+.divider::before,
+.divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.divider span {
+  padding: 0 var(--space-md);
+}
+
+.btn-google {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-sm);
+  background-color: white;
+  color: #3c4043;
+  border: 1px solid var(--border-color);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-base);
+}
+
+.btn-google:hover {
+  background-color: var(--hover-bg-color);
+  border-color: var(--text-light-color);
+  box-shadow: var(--shadow-sm);
+}
+
+.btn-google svg {
+  flex-shrink: 0;
+}
+
 /* ==========================================================================
    DASHBOARD
    ========================================================================== */

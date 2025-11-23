@@ -29,5 +29,13 @@ app.use((err, req, res, next) => {
   });
 });
 
+// for local development
+if (require.main === module) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server running on http://localhost:${PORT}`);
+  });
+}
+
 // export the handler for serverless functions
 module.exports.handler = serverless(app);

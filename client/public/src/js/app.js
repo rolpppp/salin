@@ -6,7 +6,7 @@ if ("serviceWorker" in navigator) {
       .then((registration) => {
         console.log(
           "serviceWorker registration successful with scope: ",
-          registration.scope,
+          registration.scope
         );
       })
       .catch((err) => {
@@ -24,6 +24,7 @@ import { renderTransactionsPage } from "./pages/transaction.js";
 import { renderForgotPasswordPage } from "./pages/auth/forgotPassword.js";
 import { renderResetPasswordPage } from "./pages/auth/resetPassword.js";
 import { renderOnboardingPage } from "./pages/onboarding.js";
+import { renderOAuthCallbackPage } from "./pages/auth/callback.js";
 
 const app = document.getElementById("app");
 
@@ -42,6 +43,12 @@ function router() {
     (path.startsWith("#access_token") && path.includes("type=recovery"))
   ) {
     renderResetPasswordPage(app);
+    return;
+  }
+
+  // handle oauth callback (allow without token since it's during authentication)
+  if (path.includes("#/auth/callback") || path.includes("access_token=")) {
+    renderOAuthCallbackPage(app);
     return;
   }
 
@@ -94,6 +101,9 @@ function router() {
     case "#/onboarding":
       renderOnboardingPage(app);
       break;
+    case "#/auth/callback":
+      renderOAuthCallbackPage(app);
+      break;
     default:
       // if logged in and route is unknown, go to dashboard
       if (token) {
@@ -107,7 +117,7 @@ function router() {
 // renders a generic error page with a retry button
 export function renderErrorPage(
   app,
-  message = "an unexpected error occurred.",
+  message = "an unexpected error occurred."
 ) {
   app.innerHTML = `
         <div class="card error-page">
