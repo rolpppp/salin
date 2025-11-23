@@ -8,15 +8,15 @@ exports.getDashboardData = async (req, res, next) => {
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
 
-  // Start of current month
+  // defines the start of the current month
   const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
 
-  // End of current month (start of next month - 1 day)
+  // defines the end of the current month
   const endOfMonth = new Date(year, month, 0); // Last day of current month
   const endDate = endOfMonth.toISOString().split("T")[0];
 
   try {
-    // getting total balance, 5 recent transactions, budget, total spent
+    // fethes all data concurrently for the dashboard view
     const [
       totalBalanceData,
       recentTransactionsData,
@@ -43,7 +43,7 @@ exports.getDashboardData = async (req, res, next) => {
         .eq("year", year)
         .maybeSingle(),
 
-      // total spent
+      // getting total spent for the current month
       supabase
         .from("transactions")
         .select("total:amount.sum()")
@@ -60,15 +60,16 @@ exports.getDashboardData = async (req, res, next) => {
       throw budgetData.error;
     if (totalSpentData.error) throw totalSpentData.error;
 
-    // process the data
+    // calculates the total balance from all accounts
     const totalBalance = totalBalanceData.data.reduce(
       (sum, account) => sum + parseFloat(account.balance),
       0,
     );
 
-    // total
+    // handles the total spent
     const totalSpent = totalSpentData.data?.total || 0;
 
+    // prepares the data for the dashboard view
     const dashboardData = {
       totalBalance: totalBalance,
       recentTransactions: recentTransactionsData.data,
