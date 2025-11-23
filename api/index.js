@@ -31,3 +31,11 @@ app.use((err, req, res, next) => {
 
 // export the handler for serverless functions
 module.exports.handler = serverless(app);
+
+// start the server locally if not in a serverless environment
+if (process.env.NODE_ENV !== 'production' && !process.env.LAMBDA_TASK_ROOT) {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`🚀 server running on http://localhost:${PORT}`);
+  });
+}
