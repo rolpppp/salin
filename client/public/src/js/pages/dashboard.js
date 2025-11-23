@@ -47,20 +47,30 @@ function getAccountColor(type) {
   return "linear-gradient(135deg, #10b981 0%, #059669 100%)"; // default
 }
 
+// renders the main dashboard page, unifying various financial data
 export async function renderDashboardPage(app) {
   try {
+    // fetches dashboard data, user info, and all accounts concurrently
     const [data, user, accounts] = await Promise.all([
       getDashboardData(),
       getUser(),
       getAccounts(),
     ]);
+
+    // Validate data
+    if (!data || !user || !accounts) {
+      throw new Error(
+        "Failed to load dashboard data. Please refresh the page."
+      );
+    }
+
     currentDashboardData = data;
     const displayName = user.username || user.email.split("@")[0];
     const budgetPercent =
-      data.budget.amount > 0
+      data.budget && data.budget.amount > 0
         ? (data.budget.spent / data.budget.amount) * 100
         : 0;
-    const totalBalanceValue = data.totalBalance;
+    const totalBalanceValue = data.totalBalance || 0;
 
     app.innerHTML = `
       <header class="dashboard-header">
@@ -85,29 +95,33 @@ export async function renderDashboardPage(app) {
         </div>
         <div class="accounts-horizontal-scroller" id="account-cards-container">
           ${
-            accounts.data && accounts.data.length > 0
+            // displays multiple accounts, supporting multi-account tracking
+            accounts &&
+            accounts.data &&
+            Array.isArray(accounts.data) &&
+            accounts.data.length > 0
               ? accounts.data
                   .map(
                     (account) => `
             <div class="account-card" style="background: ${getAccountColor(
-              account.type
+              account.type || "cash"
             )}">
               <div class="account-card-icon">
                 <img src="/assets/svg/${getAccountIcon(
-                  account.type
-                )}" alt="${account.type}">
+                  account.type || "cash"
+                )}" alt="${account.type || "cash"}">
               </div>
               <div class="account-card-info">
-                <p class="account-card-name">${account.name}</p>
+                <p class="account-card-name">${account.name || "Unnamed Account"}</p>
                 <p class="account-card-balance">₱${formatCurrency(
-                  account.balance
+                  account.balance || 0
                 )}</p>
               </div>
             </div>
           `
                   )
                   .join("")
-              : '<div class="empty-accounts"><p>no accounts yet. <a href="#/accounts">add your first account</a></p></div>'
+              : '<div class="empty-accounts"><p>No accounts yet. <a href="#/accounts">Add your first account</a></p></div>'
           }
         </div>
       </div>
@@ -115,12 +129,12 @@ export async function renderDashboardPage(app) {
       <div id="budget-card" class="card budget-card" style="cursor: pointer;">
         <div class="budget-info">
           <span>Monthly Budget</span>
-          <span>₱${formatCurrency(data.budget.spent)} / ₱${formatCurrency(
-            data.budget.amount
+          <span>₱${formatCurrency(data.budget?.spent || 0)} / ₱${formatCurrency(
+            data.budget?.amount || 0
           )}</span>
         </div>
         <div class="budget-progress">
-          <div class="budget-progress-bar" style="width: ${budgetPercent}%"></div>
+          <div class="budget-progress-bar" style="width: ${Math.min(budgetPercent, 100)}%"></div>
         </div>
       </div>
 
@@ -145,10 +159,12 @@ export async function renderDashboardPage(app) {
       </div>
     `;
 
+    // event listener for updating transactions, re-renders the dashboard
     window.addEventListener("transactionsUpdated", () => {
       renderDashboardPage(app);
     });
 
+    // renders and attaches listeners for recent transactions and other dashboard elements
     renderRecentTransactions(data.recentTransactions);
     attachDashboardListeners();
   } catch (error) {
@@ -156,9 +172,14 @@ export async function renderDashboardPage(app) {
   }
 }
 
+// renders the list of recent transactions on the dashboard
 function renderRecentTransactions(transactions) {
   const list = document.getElementById("recent-transactions-list");
-  if (!transactions || transactions.length === 0) {
+  if (
+    !transactions ||
+    !Array.isArray(transactions) ||
+    transactions.length === 0
+  ) {
     list.innerHTML = `
       <div class="empty-state">
         <div class="empty-state-icon">📊</div>
@@ -168,7 +189,7 @@ function renderRecentTransactions(transactions) {
       </div>
     `;
 
-    // Add click listener for empty state button
+    // adds click listener for empty state button to add transaction
     setTimeout(() => {
       const emptyBtn = document.getElementById("empty-add-expense-btn");
       if (emptyBtn) {
@@ -180,6 +201,7 @@ function renderRecentTransactions(transactions) {
     return;
   }
 
+  // maps and displays each recent transaction
   list.innerHTML = transactions
     .map(
       (t) => `
@@ -189,7 +211,7 @@ function renderRecentTransactions(transactions) {
         <div class="date">${new Date(t.date).toLocaleDateString()}</div>
       </div>
       <div class="transaction-amount ${t.type}">
-        ${t.type === "income" ? "+" : "-"}₱${formatCurrency(parseFloat(t.amount).toFixed(2))}
+        ${t.type === "income" ? "+" : "-"}₱${formatCurrency(parseFloat(t.amount || 0))}
       </div>
     </li>
     `
@@ -197,6 +219,7 @@ function renderRecentTransactions(transactions) {
     .join("");
 }
 
+// attaches event listeners to various dashboard elements
 function attachDashboardListeners() {
   const logoutBtn = document.getElementById("logout-btn");
   logoutBtn.addEventListener("click", () => {
@@ -214,6 +237,7 @@ function attachDashboardListeners() {
     openTransactionForm("income");
   });
 
+  // opens budget form when budget card is clicked, supporting simple monthly budget
   const budgetCard = document.getElementById("budget-card");
   budgetCard.addEventListener("click", () => {
     openBudgetForm(currentDashboardData.budget);
@@ -223,6 +247,7 @@ function attachDashboardListeners() {
   parseBtn.addEventListener("click", () => {
     const text = document.getElementById("paste-area").value;
     if (text.trim()) {
+      // opens parse review modal for intelligent paste-to-add functionality
       openParseReviewModal(text);
     }
   });

@@ -15,11 +15,34 @@ export async function renderTransactionsPage(app) {
   app.innerHTML = '<div class="loading-spinner"></div>';
 
   try {
-    [allTransactions, categories, accounts] = await Promise.all([
-      getTransactions(),
-      getCategories(),
-      getAccounts(),
-    ]);
+    const [transactionsResponse, categoriesResponse, accountsResponse] =
+      await Promise.all([getTransactions(), getCategories(), getAccounts()]);
+
+    // Handle different response formats (array vs {data: array})
+    allTransactions = Array.isArray(transactionsResponse)
+      ? transactionsResponse
+      : transactionsResponse?.data || [];
+
+    categories = Array.isArray(categoriesResponse)
+      ? { data: categoriesResponse }
+      : categoriesResponse;
+
+    accounts = Array.isArray(accountsResponse)
+      ? { data: accountsResponse }
+      : accountsResponse;
+
+    // Validate data
+    if (!Array.isArray(allTransactions)) {
+      throw new Error("Failed to load transactions");
+    }
+
+    if (!categories?.data || !Array.isArray(categories.data)) {
+      throw new Error("Failed to load categories");
+    }
+
+    if (!accounts?.data || !Array.isArray(accounts.data)) {
+      throw new Error("Failed to load accounts");
+    }
 
     const filterControlsHTML = `
             <div class="filter-controls card">
@@ -33,7 +56,7 @@ export async function renderTransactionsPage(app) {
                         <option value="">ALL</option>
                         ${categories.data
                           .map(
-                            (c) => `<option value="${c.id}">${c.name}</option>`,
+                            (c) => `<option value="${c.id}">${c.name}</option>`
                           )
                           .join("")}
                     </select>
@@ -113,7 +136,7 @@ function attachFilterListeners() {
     if (target.classList.contains("delete-btn")) {
       if (
         confirm(
-          "Are you sure you want to delete this transaction? This will also update your account balance.",
+          "Are you sure you want to delete this transaction? This will also update your account balance."
         )
       ) {
         try {
@@ -129,7 +152,7 @@ function attachFilterListeners() {
     // --- EDIT LOGIC ---
     if (target.classList.contains("edit-btn")) {
       const transactionToEdit = allTransactions.find(
-        (t) => t.id === transactionId,
+        (t) => t.id === transactionId
       );
       if (transactionToEdit) {
         const { openTransactionForm } = await import(

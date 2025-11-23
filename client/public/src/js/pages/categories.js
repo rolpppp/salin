@@ -10,14 +10,17 @@ import {
 import { showModal, hideModal } from "../components/Modal.js";
 import { showToast } from "../components/Toast.js";
 
+// renders the categories management page
 export async function renderCategoriesPage(app) {
   app.innerHTML = '<div class="loading-spinner"></div>';
   await renderList();
 }
 
+// renders separate lists for expense and income categories, enabling smart categorization management
 async function renderList() {
   const app = document.getElementById("app");
   try {
+    // fetches both expense and income categories concurrently
     const [expenses, incomes] = await Promise.all([
       getCategoriesByType("expense"),
       getCategoriesByType("income"),
@@ -46,6 +49,7 @@ async function renderList() {
   }
 }
 
+// renders a single category item for display
 function renderCategoryItem(category) {
   return `
         <li class="management-list-item" data-id="${category.id}">
@@ -72,6 +76,7 @@ function renderCategoryItem(category) {
     `;
 }
 
+// opens a form for adding or editing a category, including category type
 function openCategoryForm(category = null) {
   const isEdit = category !== null;
   const title = isEdit ? "Edit Category" : "Add New Category";
@@ -95,6 +100,7 @@ function openCategoryForm(category = null) {
 
   showModal(title, formContent);
 
+  // handles form submission for creating or updating a category
   document
     .getElementById("category-form")
     .addEventListener("submit", async (e) => {
@@ -105,12 +111,14 @@ function openCategoryForm(category = null) {
       };
       try {
         if (isEdit) {
+          // updates existing category
           await updateCategory(category.id, {
             name: formData.name,
             type: formData.type,
           });
           showToast("Category updated successfully");
         } else {
+          // creates a new category
           await createCategory(formData);
           showToast("Category created successfully");
         }
@@ -122,12 +130,13 @@ function openCategoryForm(category = null) {
     });
 }
 
+// attaches event listeners for category actions (add, edit, delete)
 function attachListeners() {
   document
     .getElementById("add-category-btn")
     .addEventListener("click", () => openCategoryForm());
 
-  // Attach listeners to both expense and income lists
+  // attach listeners to both expense and income lists for category management
   document.querySelectorAll(".management-list").forEach((list) => {
     list.addEventListener("click", async (e) => {
       const target = e.target;
@@ -136,6 +145,7 @@ function attachListeners() {
 
       const categoryId = listItem.dataset.id;
 
+      // handles category deletion
       if (target.closest(".delete-btn")) {
         const deleteContent = `
           <p style="margin-bottom: var(--space-lg); text-align: center;">
@@ -170,6 +180,7 @@ function attachListeners() {
           });
       }
 
+      // handles category editing
       if (target.closest(".edit-btn")) {
         const categories = await getCategories();
         const categoryToEdit = categories.data.find((c) => c.id == categoryId);

@@ -35,13 +35,41 @@ export async function openParseReviewModal(text) {
     console.log("Accounts:", userAccounts);
     console.log("Categories:", userCategories);
 
-    parsedTransactions = parsedData.transactions || parsedData || [];
-    accounts = userAccounts.data || userAccounts || [];
-    categories = userCategories.data || userCategories || [];
+    // Handle different response formats
+    parsedTransactions = Array.isArray(parsedData)
+      ? parsedData
+      : parsedData?.transactions || parsedData?.data || [];
+
+    accounts = Array.isArray(userAccounts)
+      ? userAccounts
+      : userAccounts?.data || [];
+
+    categories = Array.isArray(userCategories)
+      ? userCategories
+      : userCategories?.data || [];
 
     console.log("Final parsedTransactions:", parsedTransactions);
     console.log("Final accounts:", accounts);
     console.log("Final categories:", categories);
+
+    // Validate we have accounts and categories
+    if (!accounts || accounts.length === 0) {
+      hideModal();
+      showToast(
+        "You need to create at least one account before adding transactions. Please go to Accounts page.",
+        "error"
+      );
+      return;
+    }
+
+    if (!categories || categories.length === 0) {
+      hideModal();
+      showToast(
+        "You need to create at least one category before adding transactions. Please go to Categories page.",
+        "error"
+      );
+      return;
+    }
 
     renderResults();
     attachSaveListener();
@@ -49,7 +77,8 @@ export async function openParseReviewModal(text) {
     console.error("Parse error:", error);
     hideModal();
     showToast(
-      "Failed to parse your note. Please check your internet connection and try again.",
+      error.message ||
+        "Failed to parse your note. Please check your internet connection and try again.",
       "error"
     );
   }
@@ -133,9 +162,17 @@ function renderResults() {
 
 function attachSaveListener() {
   const saveBtn = document.getElementById("save-parsed-btn");
-  saveBtn.addEventListener("click", async () => {
-    saveBtn.textContent = "Saving...";
-    saveBtn.disabled = true;
+
+  // Remove any existing listeners to prevent multiple clicks
+  const newSaveBtn = saveBtn.cloneNode(true);
+  saveBtn.parentNode.replaceChild(newSaveBtn, saveBtn);
+
+  newSaveBtn.addEventListener("click", async () => {
+    // Prevent multiple clicks
+    if (newSaveBtn.disabled) return;
+
+    newSaveBtn.textContent = "Saving...";
+    newSaveBtn.disabled = true;
 
     try {
       const promises = parsedTransactions.map(async (t, index) => {
@@ -308,8 +345,8 @@ function attachSaveListener() {
           "Failed to save transactions. Please fix the errors and try again.",
         "error"
       );
-      saveBtn.textContent = "Save All";
-      saveBtn.disabled = false;
+      newSaveBtn.textContent = "Save All";
+      newSaveBtn.disabled = false;
     }
   });
 }

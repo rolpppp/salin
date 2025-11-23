@@ -10,17 +10,67 @@ import { formatCurrency } from "../utils.js";
 export async function openTransactionForm(type, transactionToEdit = null) {
   const isEdit = transactionToEdit !== null;
 
-  const [accounts, categories] = await Promise.all([
-    getAccounts(),
-    getCategoriesByType(type),
-  ]);
+  try {
+    const [accounts, categories] = await Promise.all([
+      getAccounts(),
+      getCategoriesByType(type),
+    ]);
 
-  const title = isEdit
-    ? "Edit Transaction"
-    : type === "expense"
-      ? "Add New Expense"
-      : "Add New Income";
+    // Validate data
+    const accountsData = Array.isArray(accounts)
+      ? accounts
+      : accounts?.data || [];
+    const categoriesData = Array.isArray(categories)
+      ? categories
+      : categories?.data || [];
 
+    if (!accountsData || accountsData.length === 0) {
+      showModal(
+        "Error",
+        "<p>You need to create at least one account first. Please go to the Accounts page.</p>"
+      );
+      return;
+    }
+
+    if (!categoriesData || categoriesData.length === 0) {
+      showModal(
+        "Error",
+        `<p>You need to create at least one ${type} category first. Please go to the Categories page.</p>`
+      );
+      return;
+    }
+
+    const title = isEdit
+      ? "Edit Transaction"
+      : type === "expense"
+        ? "Add New Expense"
+        : "Add New Income";
+
+    openTransactionFormWithData(
+      type,
+      isEdit,
+      transactionToEdit,
+      accountsData,
+      categoriesData,
+      title
+    );
+  } catch (error) {
+    console.error("Error loading transaction form:", error);
+    showModal(
+      "Error",
+      "<p>Failed to load transaction form. Please try again.</p>"
+    );
+  }
+}
+
+function openTransactionFormWithData(
+  type,
+  isEdit,
+  transactionToEdit,
+  accounts,
+  categories,
+  title
+) {
   const formContentHTML = `
         <form id="transaction-form">
             <input type="hidden" id="transaction-type" value="${type}">
@@ -45,7 +95,7 @@ export async function openTransactionForm(type, transactionToEdit = null) {
                 <label for="category">Category</label>
                 <select id="category" class="form-control" required>
                     <option value="">Select a category...</option>
-                    ${categories.data
+                    ${categories
                       .map(
                         (c) =>
                           `<option value="${c.id}" ${
@@ -62,14 +112,14 @@ export async function openTransactionForm(type, transactionToEdit = null) {
                 <label for="account">Account / Payment Method</label>
                 <select id="account" class="form-control" required>
                     <option value="">Select an account...</option>
-                   ${accounts.data
+                   ${accounts
                      .map(
                        (a) =>
                          `<option value="${a.id}" ${
                            isEdit && a.id === transactionToEdit.account_id
                              ? "selected"
                              : ""
-                         }>${a.name} (₱${formatCurrency(a.balance)})</option>`
+                         }>${a.name} (₱${formatCurrency(a.balance || 0)})</option>`
                      )
                      .join("")}
                 </select>

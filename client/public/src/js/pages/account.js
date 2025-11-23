@@ -10,11 +10,13 @@ import { showModal, hideModal } from "../components/Modal.js";
 import { showToast } from "../components/Toast.js";
 import { formatCurrency } from "../utils.js";
 
+// renders the accounts management page
 export async function renderAccountsPage(app) {
   app.innerHTML = '<div class="loading-spinner"></div>';
   await renderList();
 }
 
+// renders the list of financial accounts, supporting multi-account tracking
 async function renderList() {
   const app = document.getElementById("app");
   try {
@@ -62,6 +64,7 @@ async function renderList() {
   }
 }
 
+// opens a form for adding or editing a financial account
 function openAccountForm(account = null) {
   const isEdit = account !== null;
   const title = isEdit ? "Edit Account" : "Add New Account";
@@ -124,6 +127,7 @@ function openAccountForm(account = null) {
     }
   });
 
+  // handles form submission for creating or updating an account
   document
     .getElementById("account-form")
     .addEventListener("submit", async (e) => {
@@ -135,7 +139,7 @@ function openAccountForm(account = null) {
           ? customTypeInput.value.trim()
           : selectedTypeValue;
 
-      // Validation for custom type
+      // validation for custom type
       if (selectedTypeValue === "custom" && !accountType) {
         showToast("Please enter a custom account type", "error");
         return;
@@ -150,13 +154,14 @@ function openAccountForm(account = null) {
 
       try {
         if (isEdit) {
-          // update only name and type
+          // updates account name and type
           await updateAccount(account.id, {
             name: formData.name,
             type: formData.type,
           });
           showToast("Account updated successfully");
         } else {
+          // creates a new account
           await createAccount(formData);
           showToast("Account created successfully");
         }
@@ -168,6 +173,7 @@ function openAccountForm(account = null) {
     });
 }
 
+// attaches event listeners for account actions (add, edit, delete)
 function attachListeners() {
   document
     .getElementById("add-account-btn")
@@ -182,6 +188,7 @@ function attachListeners() {
 
       const accountId = listItem.dataset.id;
 
+      // handles account deletion
       if (target.closest(".delete-btn")) {
         const deleteContent = `
           <p style="margin-bottom: var(--space-lg); text-align: center;">
@@ -216,6 +223,7 @@ function attachListeners() {
           });
       }
 
+      // handles account editing
       if (target.closest(".edit-btn")) {
         const accounts = await getAccounts();
         const accountToEdit = accounts.data.find((a) => a.id === accountId);
@@ -223,3 +231,4 @@ function attachListeners() {
       }
     });
 }
+

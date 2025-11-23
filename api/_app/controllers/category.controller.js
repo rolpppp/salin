@@ -1,5 +1,6 @@
 const supabase = require("../config/supabase");
 
+// creates a new category with associated keywords for smart categorization
 exports.createCategory = async (req, res, next) => {
   const userId = req.user.id;
   const { name, type, keywords } = req.body;
@@ -23,6 +24,7 @@ exports.createCategory = async (req, res, next) => {
   }
 };
 
+// retrieves all categories for the user
 exports.getCategory = async (req, res, next) => {
   const userID = req.user.id;
   try {
@@ -38,6 +40,7 @@ exports.getCategory = async (req, res, next) => {
   }
 };
 
+// retrieves categories filtered by type for the user
 exports.getCategoryByType = async (req, res, next) => {
   const userID = req.user.id;
   const { type } = req.params;
@@ -55,6 +58,7 @@ exports.getCategoryByType = async (req, res, next) => {
   }
 };
 
+// updates an existing category, including its keywords
 exports.updateCategory = async (req, res, next) => {
   const userId = req.user.id;
   const { id } = req.params;
@@ -90,6 +94,7 @@ exports.updateCategory = async (req, res, next) => {
   }
 };
 
+// deletes a category
 exports.deleteCategory = async (req, res, next) => {
   const userId = req.user.id;
   const { id } = req.params;

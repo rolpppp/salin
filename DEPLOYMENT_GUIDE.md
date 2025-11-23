@@ -3,6 +3,7 @@
 ## 📋 Pre-Deployment Checklist
 
 ### ✅ Code Changes (Completed)
+
 - [x] Backend OAuth endpoints implemented
 - [x] Frontend Google Sign-In button added
 - [x] OAuth callback handler created
@@ -43,19 +44,21 @@
    - Click **CREATE CREDENTIALS** → **OAuth client ID**
    - Select **Web application**
    - Name: "Salin Web Client"
-   
+
    **Authorized JavaScript origins**:
+
    ```
    https://salinmt.netlify.app
    http://localhost:8080
    http://127.0.0.1:8080
    ```
-   
+
    **Authorized redirect URIs**:
+
    ```
    https://flxmfbwwixlaefebaorb.supabase.co/auth/v1/callback
    ```
-   
+
    - Click **CREATE**
    - **⚠️ IMPORTANT**: Copy the **Client ID** and **Client Secret**
 
@@ -104,6 +107,7 @@
 3. **Navigate to** Site configuration → Environment variables
 
 4. **Add/Update Variables**:
+
    ```
    SUPABASE_URL=https://flxmfbwwixlaefebaorb.supabase.co
    SUPABASE_SERVICE_KEY=[your-service-key]
@@ -122,6 +126,7 @@
 ## 🧪 Testing Checklist
 
 ### Local Testing (Optional)
+
 ```bash
 # Start backend
 npm start
@@ -171,28 +176,37 @@ npm run client
 ## 🐛 Troubleshooting
 
 ### Issue: "No access token received from Google"
+
 **Solution**: Check browser console logs:
+
 - Look for "Full URL" and "Parsed hash string" logs
 - Verify Supabase redirect URL is correct in Google Cloud Console
 - Ensure Google OAuth provider is enabled in Supabase
 
 ### Issue: "Failed to sign in with Google"
+
 **Solutions**:
+
 - Verify Client ID and Secret are correct in Supabase
 - Check Supabase Site URL matches https://salinmt.netlify.app
 - Verify redirect URLs are whitelisted in Supabase
 
 ### Issue: "User not found" error
+
 **Solution**: This was fixed in the code - user records are now automatically created
 
 ### Issue: Redirect loop or stuck on callback
+
 **Solutions**:
+
 - Clear browser cache and localStorage
 - Check browser console for JavaScript errors
 - Verify CLIENT_URL environment variable is set in Netlify
 
 ### Issue: OAuth works locally but not in production
+
 **Solutions**:
+
 - Verify Netlify environment variables are set
 - Check Netlify deploy logs for errors
 - Ensure production URL is in Google OAuth authorized origins
@@ -202,6 +216,7 @@ npm run client
 ## 📊 Post-Deployment Verification
 
 ### Backend Health Check
+
 ```bash
 # Test OAuth endpoint
 curl https://salinmt.netlify.app/api/auth/google
@@ -210,12 +225,14 @@ curl https://salinmt.netlify.app/api/auth/google
 ```
 
 ### Database Check
+
 - Open Supabase Dashboard
 - Check `auth.users` table has OAuth users
 - Check `public.users` table has corresponding records
 - Verify `username` field is populated
 
 ### Analytics (Optional)
+
 - Monitor Netlify analytics for new user signups
 - Check Supabase auth logs for OAuth events
 - Track Google Sign-In conversion rate
@@ -235,6 +252,7 @@ curl https://salinmt.netlify.app/api/auth/google
 ## 📱 Mobile Testing
 
 After deployment, test on mobile devices:
+
 - [ ] iOS Safari
 - [ ] Android Chrome
 - [ ] Check responsive design
@@ -262,6 +280,7 @@ After deployment, test on mobile devices:
 ## 🎉 Success Criteria
 
 Your deployment is successful when:
+
 1. ✅ Users can click "Continue with Google" on login page
 2. ✅ Google OAuth consent screen appears
 3. ✅ After approval, users redirect back to your app
@@ -276,6 +295,7 @@ Your deployment is successful when:
 ## 📞 Support
 
 If you encounter issues:
+
 1. Check browser console for errors
 2. Check Netlify function logs
 3. Check Supabase logs

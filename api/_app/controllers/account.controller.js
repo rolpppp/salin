@@ -1,5 +1,6 @@
 const supabase = require("../config/supabase");
 
+// creates a new financial account for the user
 exports.createAccount = async (req, res, next) => {
   const userId = req.user.id;
   const { name, type, balance = 0 } = req.body;
@@ -25,6 +26,7 @@ exports.createAccount = async (req, res, next) => {
   }
 };
 
+// retrieves all financial accounts belonging to the user
 exports.getAccount = async (req, res, next) => {
   const userID = req.user.id;
   try {
@@ -40,6 +42,7 @@ exports.getAccount = async (req, res, next) => {
   }
 };
 
+// updates an existing financial account for the user
 exports.updateAccount = async (req, res, next) => {
   const userId = req.user.id;
   const { id } = req.params;
@@ -75,6 +78,7 @@ exports.updateAccount = async (req, res, next) => {
   }
 };
 
+// deletes a financial account for the user
 exports.deleteAccount = async (req, res, next) => {
   const userId = req.user.id;
   const { id } = req.params;

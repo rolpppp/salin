@@ -54,6 +54,7 @@ exports.getDashboardData = async (req, res, next) => {
         .single(),
     ]);
 
+    if (totalBalanceData.error) throw totalBalanceData.error;
     if (recentTransactionsData.error) throw recentTransactionsData.error;
     // budgetData.error can be PGRST116 (no rows) which is OK - we'll handle it below
     if (budgetData.error && budgetData.error.code !== "PGRST116")
@@ -61,10 +62,13 @@ exports.getDashboardData = async (req, res, next) => {
     if (totalSpentData.error) throw totalSpentData.error;
 
     // calculates the total balance from all accounts
-    const totalBalance = totalBalanceData.data.reduce(
-      (sum, account) => sum + parseFloat(account.balance),
-      0,
-    );
+    const totalBalance =
+      totalBalanceData.data && Array.isArray(totalBalanceData.data)
+        ? totalBalanceData.data.reduce(
+            (sum, account) => sum + parseFloat(account.balance || 0),
+            0
+          )
+        : 0;
 
     // handles the total spent
     const totalSpent = totalSpentData.data?.total || 0;
@@ -72,11 +76,11 @@ exports.getDashboardData = async (req, res, next) => {
     // prepares the data for the dashboard view
     const dashboardData = {
       totalBalance: totalBalance,
-      recentTransactions: recentTransactionsData.data,
+      recentTransactions: recentTransactionsData.data || [],
       budget: {
         id: budgetData.data ? budgetData.data.id : null,
-        amount: budgetData.data ? budgetData.data.amount : 0,
-        spent: totalSpent,
+        amount: budgetData.data ? parseFloat(budgetData.data.amount || 0) : 0,
+        spent: parseFloat(totalSpent || 0),
       },
     };
     res.status(200).json(dashboardData);

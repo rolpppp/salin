@@ -1,6 +1,7 @@
 const gemini = require("../services/gemini.services.js");
 const supabase = require("../config/supabase.js");
 
+// parses user-provided text into structured transaction data using gemini's ai capabilities
 exports.parseText = async (req, res, next) => {
   const { text } = req.body;
   const userId = req.user.id;
@@ -10,7 +11,7 @@ exports.parseText = async (req, res, next) => {
   }
 
   try {
-    // fetch user categories
+    // fetches user-defined categories to aid in smart categorization during parsing
     const { data: categories, error: catError } = await supabase
       .from("categories")
       .select("name")
@@ -18,7 +19,7 @@ exports.parseText = async (req, res, next) => {
 
     if (catError) throw catError;
 
-    // call gemini service
+    // calls the gemini service to intelligently parse the transaction text
     const parsedData = await gemini.parseTransactions(text, categories);
 
     res.status(200).json(parsedData);
