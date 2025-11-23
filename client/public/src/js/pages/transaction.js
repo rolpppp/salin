@@ -1,5 +1,6 @@
 import { renderErrorPage } from "../app.js";
 import { showToast } from "../components/Toast.js";
+import { showModal, hideModal } from "../components/Modal.js";
 import {
   getTransactions,
   getCategories,
@@ -134,19 +135,39 @@ function attachFilterListeners() {
 
     // --- DELETE LOGIC ---
     if (target.classList.contains("delete-btn")) {
-      if (
-        confirm(
-          "Are you sure you want to delete this transaction? This will also update your account balance."
-        )
-      ) {
+      const transactionTitle = row.querySelector(".management-list-item") 
+        ? row.querySelector(".name")?.textContent 
+        : row.querySelector("td:nth-child(2)")?.textContent || "this transaction";
+      
+      showModal(
+        "Delete Transaction",
+        `
+        <p>Are you sure you want to delete <strong>${transactionTitle}</strong>?</p>
+        <p>This will also update your account balance.</p>
+        <div style="display: flex; gap: 1rem; justify-content: flex-end; margin-top: 1.5rem;">
+          <button id="cancel-delete-btn" class="btn btn-secondary">Cancel</button>
+          <button id="confirm-delete-btn" class="btn btn-danger">Delete</button>
+        </div>
+        `
+      );
+
+      // Cancel button
+      document.getElementById("cancel-delete-btn").addEventListener("click", () => {
+        hideModal();
+      });
+
+      // Confirm delete button
+      document.getElementById("confirm-delete-btn").addEventListener("click", async () => {
         try {
+          hideModal();
+          showToast("Deleting transaction...", "info");
           await deleteTransaction(transactionId);
-          showToast("Transaction deleted successfully");
+          showToast("Transaction deleted successfully", "success");
           renderTransactionsPage(document.getElementById("app"));
         } catch (error) {
           showToast(error.message, "error");
         }
-      }
+      });
     }
 
     // --- EDIT LOGIC ---
