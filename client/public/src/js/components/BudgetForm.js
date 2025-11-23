@@ -2,6 +2,7 @@ import { showModal, hideModal } from "./Modal.js";
 import { setBudget, updateBudget } from "../api.js";
 import { getCurrentBudget } from "../api.js";
 import { showToast } from "./Toast.js";
+import { formatCurrency } from "../utils.js";
 
 export function openBudgetForm(currentBudget = {}) {
   const now = new Date();
@@ -47,11 +48,11 @@ export function openBudgetForm(currentBudget = {}) {
       if (currentBudget.id) {
         // Budget exists, update it
         await updateBudget(currentBudget.id, { amount: budgetData.amount });
-        showToast(`Budget updated to ₱${budgetData.amount.toFixed(2)}`);
+        showToast(`Budget updated to ₱${formatCurrency(budgetData.amount)}`);
       } else {
         // No budget exists, create new one
         await setBudget(budgetData);
-        showToast(`Budget set to ₱${budgetData.amount.toFixed(2)}`);
+        showToast(`Budget set to ₱${formatCurrency(budgetData.amount)}`);
       }
 
       hideModal();

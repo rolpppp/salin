@@ -1,10 +1,12 @@
 import { showModal, hideModal } from "./Modal.js";
+import { showToast } from "./Toast.js";
 import {
   parseText,
   createTransaction,
   getAccounts,
   getCategories,
 } from "../api.js";
+import { formatCurrency } from "../utils.js";
 
 let parsedTransactions = [];
 let accounts = [];
@@ -45,8 +47,11 @@ export async function openParseReviewModal(text) {
     attachSaveListener();
   } catch (error) {
     console.error("Parse error:", error);
-    document.getElementById("parse-loading").innerHTML =
-      `<p class="error-message">${error.message}</p>`;
+    hideModal();
+    showToast(
+      "Failed to parse your note. Please check your internet connection and try again.",
+      "error"
+    );
   }
 }
 
@@ -66,7 +71,7 @@ function renderResults() {
     .map((t, index) => {
       const transactionType = t.type || "expense";
       const filteredCategories = categories.filter(
-        (c) => c.type === transactionType,
+        (c) => c.type === transactionType
       );
 
       // find default account (Cash or Wallet for expenses, first account for income)
@@ -75,7 +80,7 @@ function renderResults() {
         const cashAccount = accounts.find(
           (a) =>
             a.name.toLowerCase().includes("cash") ||
-            a.name.toLowerCase().includes("wallet"),
+            a.name.toLowerCase().includes("wallet")
         );
         if (cashAccount) defaultAccountId = cashAccount.id;
       }
@@ -112,11 +117,11 @@ function renderResults() {
       const index = listItem.dataset.index;
       const selectedType = e.target.value;
       const categorySelect = listItem.querySelector(
-        '[data-field="category_id"]',
+        '[data-field="category_id"]'
       );
 
       const filteredCategories = categories.filter(
-        (c) => c.type === selectedType,
+        (c) => c.type === selectedType
       );
       categorySelect.innerHTML = `
                 <option value="">Select Category</option>
@@ -136,17 +141,17 @@ function attachSaveListener() {
       const promises = parsedTransactions.map(async (t, index) => {
         const itemEl = document.querySelector(`li[data-index='${index}']`);
         const categoryValue = itemEl.querySelector(
-          '[data-field="category_id"]',
+          '[data-field="category_id"]'
         ).value;
         const accountValue = itemEl.querySelector(
-          '[data-field="account_id"]',
+          '[data-field="account_id"]'
         ).value;
         const typeValue = itemEl.querySelector('[data-field="type"]').value;
 
         const transactionData = {
           title: itemEl.querySelector('[data-field="title"]').value.trim(),
           amount: parseFloat(
-            itemEl.querySelector('[data-field="amount"]').value,
+            itemEl.querySelector('[data-field="amount"]').value
           ),
           category_id: categoryValue, // keep as string (UUID)
           type: typeValue, // use selected type
@@ -163,30 +168,146 @@ function attachSaveListener() {
         }
         if (isNaN(transactionData.amount) || transactionData.amount <= 0) {
           throw new Error(
-            `Transaction ${index + 1}: Valid amount is required.`,
+            `Transaction ${index + 1}: Valid amount is required.`
           );
         }
         if (!transactionData.account_id) {
           throw new Error(
-            `Transaction ${index + 1}: Please select an account.`,
+            `Transaction ${index + 1}: Please select an account.`
           );
         }
         if (!transactionData.category_id) {
           throw new Error(
-            `Transaction ${index + 1}: Please select a category.`,
+            `Transaction ${index + 1}: Please select a category.`
           );
+        }
+
+        // Check account balance for expenses
+        if (transactionData.type === "expense") {
+          const selectedAccount = accounts.find(
+            (a) => a.id === transactionData.account_id
+          );
+
+          if (selectedAccount && !selectedAccount.allow_negative) {
+            const currentBalance = parseFloat(selectedAccount.balance) || 0;
+            const resultingBalance = currentBalance - transactionData.amount;
+
+            if (resultingBalance < 0) {
+              const shortfall = Math.abs(resultingBalance);
+              throw new Error(
+                `Transaction ${index + 1}: Insufficient balance in "${selectedAccount.name}". Need ₱${formatCurrency(shortfall)} more (Current: ₱${formatCurrency(currentBalance)}, Required: ₱${formatCurrency(transactionData.amount)})`
+              );
+            }
+          }
         }
 
         return createTransaction(transactionData);
       });
 
-      await Promise.all(promises);
-      hideModal();
-      alert("All transactions saved successfully!");
-      window.dispatchEvent(new CustomEvent("transactionsUpdated"));
+      const results = await Promise.allSettled(promises);
+
+      // Check for failures
+      const failures = [];
+      const successes = [];
+
+      results.forEach((result, index) => {
+        if (result.status === "rejected") {
+          failures.push({ index, reason: result.reason });
+        } else {
+          successes.push({ index, value: result.value });
+        }
+      });
+
+      if (failures.length === 0) {
+        // All succeeded - close modal and show success
+        hideModal();
+        showToast(
+          `All ${successes.length} transaction${successes.length > 1 ? "s" : ""} saved successfully!`,
+          "success"
+        );
+        window.dispatchEvent(new CustomEvent("transactionsUpdated"));
+      } else if (successes.length > 0) {
+        // Partial success - close modal and show warning with details
+        hideModal();
+        const failureDetails = failures
+          .map((f) => {
+            const errorMsg = f.reason?.message || "Unknown error";
+            const errorMsgLower = errorMsg.toLowerCase();
+
+            // Check if it's our detailed balance error (already has good message)
+            if (
+              errorMsg.includes("Insufficient balance in") ||
+              errorMsg.includes("Need ₱")
+            ) {
+              return errorMsg; // Use the detailed message as-is
+            } else if (
+              errorMsgLower.includes("negative balance") ||
+              errorMsgLower.includes("does not allow negative")
+            ) {
+              const transactionNum = f.index + 1;
+              return `Transaction ${transactionNum}: Insufficient balance`;
+            } else if (errorMsgLower.includes("required")) {
+              const transactionNum = f.index + 1;
+              return `Transaction ${transactionNum}: Missing required field`;
+            } else if (errorMsgLower.includes("invalid")) {
+              const transactionNum = f.index + 1;
+              return `Transaction ${transactionNum}: Invalid data`;
+            } else {
+              return errorMsg;
+            }
+          })
+          .join(". ");
+
+        showToast(
+          `${successes.length} transaction${successes.length > 1 ? "s" : ""} saved. ${failures.length} failed: ${failureDetails}`,
+          "warning"
+        );
+        window.dispatchEvent(new CustomEvent("transactionsUpdated"));
+      } else {
+        // All failed - keep modal open and show error
+        const errorTypes = failures.map((f) => {
+          const errorMsg = f.reason?.message || "Unknown error";
+          const errorMsgLower = errorMsg.toLowerCase();
+
+          // Check if it's our detailed balance error (already has good message)
+          if (
+            errorMsg.includes("Insufficient balance in") ||
+            errorMsg.includes("Need ₱")
+          ) {
+            return errorMsg; // Use the detailed message as-is
+          } else if (
+            errorMsgLower.includes("negative balance") ||
+            errorMsgLower.includes("does not allow negative")
+          ) {
+            const transactionNum = f.index + 1;
+            return `Transaction ${transactionNum}: Insufficient balance`;
+          } else if (errorMsgLower.includes("required")) {
+            const transactionNum = f.index + 1;
+            return `Transaction ${transactionNum}: Missing required field`;
+          } else if (errorMsgLower.includes("invalid")) {
+            const transactionNum = f.index + 1;
+            return `Transaction ${transactionNum}: Invalid data`;
+          } else {
+            return errorMsg;
+          }
+        });
+
+        const errorSummary = errorTypes.slice(0, 2).join(". ");
+        const moreErrors =
+          failures.length > 2
+            ? `. Plus ${failures.length - 2} more error(s)`
+            : "";
+
+        throw new Error(`${errorSummary}${moreErrors}`);
+      }
     } catch (error) {
       console.error("Save error:", error);
-      alert(error.message);
+      // Keep modal open, show error, and re-enable button
+      showToast(
+        error.message ||
+          "Failed to save transactions. Please fix the errors and try again.",
+        "error"
+      );
       saveBtn.textContent = "Save All";
       saveBtn.disabled = false;
     }

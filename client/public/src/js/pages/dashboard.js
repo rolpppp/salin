@@ -3,6 +3,7 @@ import { getDashboardData, getUser, getAccounts } from "../api.js";
 import { openTransactionForm } from "../components/TransactionForm.js";
 import { openBudgetForm } from "../components/BudgetForm.js";
 import { openParseReviewModal } from "../components/ParseReview.js";
+import { formatCurrency } from "../utils.js";
 
 let currentDashboardData = {};
 
@@ -54,7 +55,7 @@ export async function renderDashboardPage(app) {
       getAccounts(),
     ]);
     currentDashboardData = data;
-    const displayName = user.user_metadata.name || user.email.split("@")[0];
+    const displayName = user.username || user.email.split("@")[0];
     const budgetPercent =
       data.budget.amount > 0
         ? (data.budget.spent / data.budget.amount) * 100
@@ -80,7 +81,7 @@ export async function renderDashboardPage(app) {
       <div class="card balance-card">
         <div class="total-balance-display">
           <h2>Total Balance</h2>
-          <p class="balance">₱${totalBalanceValue.toFixed(2)}</p>
+          <p class="balance">₱${formatCurrency(totalBalanceValue)}</p>
         </div>
         <div class="accounts-horizontal-scroller" id="account-cards-container">
           ${
@@ -97,9 +98,10 @@ export async function renderDashboardPage(app) {
                 )}" alt="${account.type}">
               </div>
               <div class="account-card-info">
-                <p class="account-card-balance">₱${parseFloat(
+                <p class="account-card-name">${account.name}</p>
+                <p class="account-card-balance">₱${formatCurrency(
                   account.balance
-                ).toFixed(2)}</p>
+                )}</p>
               </div>
             </div>
           `
@@ -113,9 +115,9 @@ export async function renderDashboardPage(app) {
       <div id="budget-card" class="card budget-card" style="cursor: pointer;">
         <div class="budget-info">
           <span>Monthly Budget</span>
-          <span>₱${data.budget.spent.toFixed(2)} / ₱${parseFloat(
+          <span>₱${formatCurrency(data.budget.spent)} / ₱${formatCurrency(
             data.budget.amount
-          ).toFixed(2)}</span>
+          )}</span>
         </div>
         <div class="budget-progress">
           <div class="budget-progress-bar" style="width: ${budgetPercent}%"></div>
@@ -147,7 +149,7 @@ export async function renderDashboardPage(app) {
       renderDashboardPage(app);
     });
 
-    renderRecentTransactions(data.transactions);
+    renderRecentTransactions(data.recentTransactions);
     attachDashboardListeners();
   } catch (error) {
     renderErrorPage(app, error.message);
@@ -156,12 +158,7 @@ export async function renderDashboardPage(app) {
 
 function renderRecentTransactions(transactions) {
   const list = document.getElementById("recent-transactions-list");
-  if (
-    !transactions ||
-    !transactions.data ||
-    !Array.isArray(transactions.data) ||
-    transactions.data.length === 0
-  ) {
+  if (!transactions || transactions.length === 0) {
     list.innerHTML = `
       <div class="empty-state">
         <div class="empty-state-icon">📊</div>
@@ -183,7 +180,7 @@ function renderRecentTransactions(transactions) {
     return;
   }
 
-  list.innerHTML = data.transactions
+  list.innerHTML = transactions
     .map(
       (t) => `
     <li>
@@ -192,7 +189,7 @@ function renderRecentTransactions(transactions) {
         <div class="date">${new Date(t.date).toLocaleDateString()}</div>
       </div>
       <div class="transaction-amount ${t.type}">
-        ${t.type === "income" ? "+" : "-"}₱${parseFloat(t.amount).toFixed(2)}
+        ${t.type === "income" ? "+" : "-"}₱${formatCurrency(parseFloat(t.amount).toFixed(2))}
       </div>
     </li>
     `
