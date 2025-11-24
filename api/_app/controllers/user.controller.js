@@ -11,7 +11,22 @@ exports.getUser = async (req, res, next) => {
       error: authError,
     } = await supabase.auth.admin.getUserById(userId);
 
-    if (authError) throw authError;
+    if (authError) {
+      if (authError?.message?.toLowerCase().includes("user not found")) {
+        return res.status(404).json({
+          error: "User not found",
+          code: "USER_NOT_FOUND",
+        });
+      }
+      throw authError;
+    }
+
+    if (!user) {
+      return res.status(404).json({
+        error: "User not found",
+        code: "USER_NOT_FOUND",
+      });
+    }
 
     // Get username from public.users table
     const { data: publicUser, error: publicError } = await supabase

@@ -3,6 +3,7 @@ import { getDashboardData, getUser, getAccounts } from "../api.js";
 import { openTransactionForm } from "../components/TransactionForm.js";
 import { openBudgetForm } from "../components/BudgetForm.js";
 import { openParseReviewModal } from "../components/ParseReview.js";
+import { openFeedbackForm } from "../components/FeedbackForm.js";
 import { formatCurrency } from "../utils.js";
 
 let currentDashboardData = {};
@@ -157,6 +158,26 @@ export async function renderDashboardPage(app) {
         <ul id="recent-transactions-list" class="recent-transactions-list">
         </ul>
       </div>
+
+      <footer class="dashboard-footer">
+        <div class="footer-content">
+          <p style="margin: 0; color: var(--text-light-color); font-size: var(--font-size-sm);">
+            © 2025 salin - Money Tracker by rolpjinri
+          </p>
+          <button id="feedback-btn" class="btn-link" style="
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-size: var(--font-size-sm);
+            font-weight: 500;
+            cursor: pointer;
+            padding: 0;
+            text-decoration: underline;
+          ">
+            💬 Send Feedback
+          </button>
+        </div>
+      </footer>
     `;
 
     // event listener for updating transactions, re-renders the dashboard
@@ -250,5 +271,10 @@ function attachDashboardListeners() {
       // opens parse review modal for intelligent paste-to-add functionality
       openParseReviewModal(text);
     }
+  });
+
+  const feedbackBtn = document.getElementById("feedback-btn");
+  feedbackBtn.addEventListener("click", () => {
+    openFeedbackForm();
   });
 }

@@ -18,6 +18,7 @@ app.use("/api/budget", require("./_app/routes/budget.routes.js"));
 app.use("/api/categories", require("./_app/routes/category.routes.js"));
 app.use("/api/parse", require("./_app/routes/parsing.routes.js"));
 app.use("/api/dashboard", require("./_app/routes/dashboard.routes.js"));
+app.use("/api/feedback", require("./_app/routes/feedback.routes.js"));
 
 // simple error-handling middleware
 app.use((err, req, res, next) => {

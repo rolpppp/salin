@@ -21,10 +21,10 @@ module.exports = function (req, res, next) {
 
   // verifiy the token
   try {
-    const decoded = jwt.verify(actualToken, process.env.JWT_SECRET);
+  const decoded = jwt.verify(actualToken, process.env.JWT_SECRET);
 
-    // if valid, add user info
-    req.user = { id: decoded.id };
+  // if valid, add user info
+  req.user = { id: decoded.id, email: decoded.email };
 
     // call the next middleware
     next();

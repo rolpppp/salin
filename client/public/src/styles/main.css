@@ -1323,3 +1323,27 @@ html {
 .management-list-item:hover {
   background: linear-gradient(to right, rgba(99, 102, 241, 0.03), transparent);
 }
+
+/* ==========================================================================
+   FOOTER STYLES
+   ========================================================================== */
+.dashboard-footer {
+  margin-top: var(--space-xl);
+  padding: var(--space-lg) 0;
+  border-top: 1px solid var(--border-color);
+}
+
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+
+@media (max-width: 480px) {
+  .footer-content {
+    flex-direction: column;
+    text-align: center;
+  }
+}

@@ -258,3 +258,12 @@ export function deleteTransaction(id) {
     headers: getAuthHeaders(),
   });
 }
+
+// --- Feedback Endpoint ---
+export function submitFeedback(feedbackData) {
+  return request("/feedback", {
+    method: "POST",
+    headers: getAuthHeaders(),
+    body: JSON.stringify(feedbackData),
+  });
+}

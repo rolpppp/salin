@@ -137,10 +137,11 @@ function attachFilterListeners() {
     // Check if delete button or its child elements were clicked
     const deleteBtn = target.closest(".delete-btn");
     if (deleteBtn) {
-      const transactionTitle = row.querySelector(".management-list-item") 
-        ? row.querySelector(".name")?.textContent 
-        : row.querySelector("td:nth-child(2)")?.textContent || "this transaction";
-      
+      const transactionTitle = row.querySelector(".management-list-item")
+        ? row.querySelector(".name")?.textContent
+        : row.querySelector("td:nth-child(2)")?.textContent ||
+          "this transaction";
+
       showModal(
         "Delete Transaction",
         `
@@ -154,22 +155,26 @@ function attachFilterListeners() {
       );
 
       // Cancel button
-      document.getElementById("cancel-delete-btn").addEventListener("click", () => {
-        hideModal();
-      });
+      document
+        .getElementById("cancel-delete-btn")
+        .addEventListener("click", () => {
+          hideModal();
+        });
 
       // Confirm delete button
-      document.getElementById("confirm-delete-btn").addEventListener("click", async () => {
-        try {
-          hideModal();
-          showToast("Deleting transaction...", "info");
-          await deleteTransaction(transactionId);
-          showToast("Transaction deleted successfully", "success");
-          renderTransactionsPage(document.getElementById("app"));
-        } catch (error) {
-          showToast(error.message, "error");
-        }
-      });
+      document
+        .getElementById("confirm-delete-btn")
+        .addEventListener("click", async () => {
+          try {
+            hideModal();
+            showToast("Deleting transaction...", "info");
+            await deleteTransaction(transactionId);
+            showToast("Transaction deleted successfully", "success");
+            renderTransactionsPage(document.getElementById("app"));
+          } catch (error) {
+            showToast(error.message, "error");
+          }
+        });
     }
 
     // --- EDIT LOGIC ---
