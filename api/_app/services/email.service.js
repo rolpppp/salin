@@ -1,7 +1,10 @@
 const { Resend } = require("resend");
 
-// Initialize Resend with API key from environment variable
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Initialize Resend only if API key is available
+let resend;
+if (process.env.RESEND_API_KEY) {
+  resend = new Resend(process.env.RESEND_API_KEY);
+}
 
 /**
  * Send feedback email using Resend
@@ -56,8 +59,8 @@ async function sendFeedbackEmail(feedbackData) {
 
           <div class="metadata">
             <p><strong>From:</strong> ${userEmail} ${
-    email && email !== userEmail ? `(Reply to: ${email})` : ""
-  }</p>
+              email && email !== userEmail ? `(Reply to: ${email})` : ""
+            }</p>
             <p><strong>User ID:</strong> ${userId}</p>
             <p><strong>Submitted:</strong> ${new Date().toLocaleString()}</p>
             ${url ? `<p><strong>Page:</strong> ${url}</p>` : ""}
@@ -75,7 +78,13 @@ async function sendFeedbackEmail(feedbackData) {
   try {
     // Send email using Resend
     if (!process.env.RESEND_API_KEY || !process.env.FEEDBACK_EMAIL) {
+      console.warn("⚠️ Resend not configured - feedback email will not be sent");
       throw new Error("Email service not configured. Please contact support.");
+    }
+
+    if (!resend) {
+      console.error("❌ Resend client not initialized");
+      throw new Error("Email service initialization failed");
     }
 
     const emailPayload = {
@@ -95,11 +104,16 @@ async function sendFeedbackEmail(feedbackData) {
 
     const emailResult = await resend.emails.send(emailPayload);
 
-    console.log("✅ Resend API response:", JSON.stringify(emailResult, null, 2));
-    
+    console.log(
+      "✅ Resend API response:",
+      JSON.stringify(emailResult, null, 2)
+    );
+
     if (emailResult.error) {
       console.error("❌ Resend API error:", emailResult.error);
-      throw new Error(`Failed to send email: ${JSON.stringify(emailResult.error)}`);
+      throw new Error(
+        `Failed to send email: ${JSON.stringify(emailResult.error)}`
+      );
     }
 
     const emailId = emailResult.id || emailResult.data?.id;
