@@ -23,6 +23,14 @@ async function request(endpoint, options = {}) {
     const data = await response.json();
 
     if (!response.ok) {
+      // handle 401 Unauthorized - clear storage and redirect to login
+      if (response.status === 401) {
+        console.warn("Session expired or invalid. Logging out...");
+        localStorage.clear();
+        window.location.hash = "#/login";
+        throw new Error("Session expired. Please login again.");
+      }
+
       throw new Error(
         data.error || data.details || "An unknown error occured."
       );
