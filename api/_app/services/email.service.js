@@ -134,4 +134,97 @@ async function sendFeedbackEmail(feedbackData) {
 
 module.exports = {
   sendFeedbackEmail,
+  // Send onboarding/welcome email to newly registered users
+  sendOnboardingEmail,
 };
+
+/**
+ * Send onboarding email to a new user.
+ * @param {Object} user - User object
+ * @param {string} user.id - User id
+ * @param {string} user.email - User email
+ * @param {string} [user.full_name] - Optional full name
+ */
+async function sendOnboardingEmail(user) {
+  const { id, email, full_name } = user || {};
+
+  if (!email) {
+    console.warn("sendOnboardingEmail called without email");
+    return { success: false, message: "No email provided" };
+  }
+
+  if (!process.env.RESEND_API_KEY) {
+    console.warn(
+      "Resend not configured - skipping onboarding email for:",
+      email
+    );
+    return { success: false, message: "Resend not configured" };
+  }
+
+  if (!resend) {
+    console.error(
+      "Resend client not initialized - cannot send onboarding email"
+    );
+    return { success: false, message: "Resend initialization failed" };
+  }
+
+  const displayName = full_name || email.split("@")[0];
+
+  const html = `
+    <!doctype html>
+    <html>
+    <head>
+      <meta charset="utf-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1" />
+      <title>Welcome to Salin</title>
+      <style>
+        body { font-family: Inter, Arial, sans-serif; color: #111827; }
+        .container { max-width: 600px; margin: 0 auto; padding: 24px; }
+        .header { background: #4F46E5; color: white; padding: 20px; border-radius: 8px; }
+        .content { margin-top: 16px; }
+        .btn { display:inline-block; padding: 10px 16px; background:#4F46E5; color:white; text-decoration:none; border-radius:6px; }
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1 style="margin:0;">Welcome to Salin, ${displayName} 👋</h1>
+        </div>
+        <div class="content">
+          <p>Thanks for signing up for Salin — your lightweight money tracker.</p>
+          <p>Here are a few steps to get started:</p>
+          <ul>
+            <li>Create an account (Cash, Bank, Wallet)</li>
+            <li>Add a transaction using the + button</li>
+            <li>Set a budget and track your spending</li>
+          </ul>
+          <p>
+            <a class="btn" href="${process.env.CLIENT_URL || "https://salinmt.netlify.app"}">Open Salin</a>
+          </p>
+          <p style="color:#6b7280;font-size:12px;">If you need help, reply to this email or use the feedback form in the app.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+  `;
+
+  try {
+    const payload = {
+      from:
+        process.env.RESEND_FROM_EMAIL ||
+        "Salin Feedback <onboarding@resend.dev>",
+      to: email,
+      subject: `Welcome to Salin — Let's get you set up 🎉`,
+      html,
+    };
+
+    console.log("📤 Sending onboarding email to:", email);
+    const resp = await resend.emails.send(payload);
+    console.log("✅ Resend onboarding response:", JSON.stringify(resp));
+    const emailId = resp.id || resp.data?.id;
+    return { success: true, emailId };
+  } catch (err) {
+    console.error("❌ Failed to send onboarding email:", err);
+    return { success: false, error: err?.message || String(err) };
+  }
+}

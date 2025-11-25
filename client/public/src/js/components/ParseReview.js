@@ -160,6 +160,7 @@ function renderResults() {
   });
 }
 
+// attach save button listener
 function attachSaveListener() {
   const saveBtn = document.getElementById("save-parsed-btn");
 

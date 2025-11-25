@@ -1,5 +1,6 @@
 const supabase = require("../config/supabase");
 const { createClient } = require("@supabase/supabase-js");
+const { sendOnboardingEmail } = require("../services/email.service.js");
 const jwt = require("jsonwebtoken");
 
 // register a new user
@@ -36,6 +37,23 @@ exports.registerUser = async (req, res, next) => {
       token,
       user: { id: newUser.user.id, email: newUser.user.email },
     });
+
+    // Fire-and-forget onboarding email — don't block signup if email fails
+    try {
+      sendOnboardingEmail({
+        id: newUser.user.id,
+        email: newUser.user.email,
+        full_name: newUser.user.user_metadata?.full_name || null,
+      })
+        .then((r) => {
+          console.log("Onboarding email result:", r);
+        })
+        .catch((err) => {
+          console.error("Onboarding email error:", err);
+        });
+    } catch (err) {
+      console.error("Onboarding email trigger failed:", err);
+    }
   } catch (error) {
     next(error); // pass error
   }

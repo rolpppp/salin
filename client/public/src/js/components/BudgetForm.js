@@ -4,6 +4,7 @@ import { getCurrentBudget } from "../api.js";
 import { showToast } from "./Toast.js";
 import { formatCurrency } from "../utils.js";
 
+// open budget form to allow user to input current budget
 export function openBudgetForm(currentBudget = {}) {
   const now = new Date();
   const monthName = now.toLocaleString("default", { month: "long" });

@@ -1,18 +1,21 @@
 const { start } = require("repl");
 const supabase = require("../config/supabase");
 
+// handles budget creation
 exports.createBudget = async (req, res, next) => {
   const userId = req.user.id;
   const now = new Date();
   const { amount, month } = req.body;
   const year = now.getFullYear();
 
+  // checks if field inputs are filled
   if (!amount || !month) {
     return res
       .status(400)
       .json({ error: "Budget amount and month are required" });
   }
 
+  // inserts the input values to the database
   try {
     const { data, error } = await supabase
       .from("budgets")
@@ -28,6 +31,7 @@ exports.createBudget = async (req, res, next) => {
   }
 };
 
+// gets the current budget
 exports.getCurrentBudget = async (req, res, next) => {
   const userID = req.user.id;
   const now = new Date();
@@ -43,7 +47,7 @@ exports.getCurrentBudget = async (req, res, next) => {
       .eq("year", year)
       .single();
 
-    // Handle case when no budget exists (PGRST116 error)
+    // handle case when no budget exists (PGRST116 error)
     if (error && error.code !== "PGRST116") throw error;
 
     // calculate total spent
@@ -60,9 +64,10 @@ exports.getCurrentBudget = async (req, res, next) => {
 
     const totalSpent = spentData.reduce(
       (sum, transaction) => sum + parseFloat(transaction.amount),
-      0,
+      0
     );
 
+    // sends the json file of the data
     res.status(200).json({
       id: budgetData.data.id,
       amount: budgetData.data ? budgetData.data.amount : 0,
@@ -75,6 +80,7 @@ exports.getCurrentBudget = async (req, res, next) => {
   }
 };
 
+// updates the budget
 exports.updateBudget = async (req, res, next) => {
   const userId = req.user.id;
   const { id } = req.params;
@@ -110,10 +116,12 @@ exports.updateBudget = async (req, res, next) => {
   }
 };
 
+// deletes the budget
 exports.deleteBudget = async (req, res, next) => {
   const userId = req.user.id;
   const { id } = req.params;
 
+  // retrieves current month's budget
   try {
     const { data: existingBudget, error: findError } = await supabase
       .from("budgets")
@@ -126,6 +134,7 @@ exports.deleteBudget = async (req, res, next) => {
       return res.status(404).json({ error: "Budget not found" });
     }
 
+    // deletes the existing budget
     const { data, error } = await supabase
       .from("budgets")
       .delete()

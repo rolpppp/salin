@@ -8,7 +8,7 @@ import { formatCurrency } from "../utils.js";
 
 let currentDashboardData = {};
 
-// Map account types to SVG icon filenames
+// map account types to SVG icon filenames
 function getAccountIcon(type) {
   const typeMap = {
     cash: "cash.svg",
@@ -34,7 +34,7 @@ function getAccountIcon(type) {
   return "cash.svg";
 }
 
-// Get color gradient for account type
+// get color gradient for account type
 function getAccountColor(type) {
   const lowerType = type.toLowerCase();
   if (lowerType.includes("cash"))
