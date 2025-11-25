@@ -78,7 +78,9 @@ async function sendFeedbackEmail(feedbackData) {
   try {
     // Send email using Resend
     if (!process.env.RESEND_API_KEY || !process.env.FEEDBACK_EMAIL) {
-      console.warn("⚠️ Resend not configured - feedback email will not be sent");
+      console.warn(
+        "⚠️ Resend not configured - feedback email will not be sent"
+      );
       throw new Error("Email service not configured. Please contact support.");
     }
 
