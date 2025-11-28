@@ -29,11 +29,17 @@ exports.createAccount = async (req, res, next) => {
 // retrieves all financial accounts belonging to the user
 exports.getAccount = async (req, res, next) => {
   const userID = req.user.id;
+  const includeArchived = req.query.include_archived === "true";
+
   try {
-    const { data, error } = await supabase
-      .from("accounts")
-      .select("*")
-      .eq("user_id", userID);
+    let query = supabase.from("accounts").select("*").eq("user_id", userID);
+
+    // By default, exclude archived accounts
+    if (!includeArchived) {
+      query = query.eq("is_archived", false);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     res.status(200).json({ data });
@@ -78,15 +84,16 @@ exports.updateAccount = async (req, res, next) => {
   }
 };
 
-// deletes a financial account for the user
+// deletes or archives a financial account for the user
 exports.deleteAccount = async (req, res, next) => {
   const userId = req.user.id;
   const { id } = req.params;
 
   try {
+    // Get the account with balance information
     const { data: existingAccount, error: findError } = await supabase
       .from("accounts")
-      .select("id")
+      .select("id, name, balance")
       .eq("id", id)
       .eq("user_id", userId)
       .single();
@@ -95,16 +102,56 @@ exports.deleteAccount = async (req, res, next) => {
       return res.status(404).json({ error: "Account not found" });
     }
 
-    const { data, error } = await supabase
-      .from("accounts")
-      .delete()
-      .eq("id", id)
-      .select()
-      .single();
+    // Check if account has any transactions
+    const { data: transactions, error: transactionError } = await supabase
+      .from("transactions")
+      .select("id")
+      .eq("account_id", id)
+      .limit(1);
 
-    if (error) throw error;
+    if (transactionError) throw transactionError;
 
-    res.status(201).json({ message: "Account deleted successfully" });
+    const hasTransactions = transactions && transactions.length > 0;
+    const hasBalance = parseFloat(existingAccount.balance) !== 0;
+
+    // Determine if we should archive or delete
+    const shouldArchive = hasBalance || hasTransactions;
+
+    if (shouldArchive) {
+      // Archive the account (soft delete)
+      const { data, error } = await supabase
+        .from("accounts")
+        .update({ is_archived: true })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      res.status(200).json({
+        message: "Account archived successfully",
+        action: "archived",
+        reason: hasBalance
+          ? "Account has a non-zero balance"
+          : "Account has transaction history",
+        data,
+      });
+    } else {
+      // Permanently delete the account
+      const { data, error } = await supabase
+        .from("accounts")
+        .delete()
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      res.status(200).json({
+        message: "Account deleted successfully",
+        action: "deleted",
+      });
+    }
   } catch (error) {
     next(error);
   }

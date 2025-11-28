@@ -145,11 +145,14 @@ function attachListeners() {
 
       const categoryId = listItem.dataset.id;
 
-      // handles category deletion
+      // handles category deletion or archiving
       if (target.closest(".delete-btn")) {
         const deleteContent = `
           <p style="margin-bottom: var(--space-lg); text-align: center;">
-            Are you sure you want to delete this category? This action cannot be undone.
+            Are you sure you want to delete this category?
+          </p>
+          <p style="margin-bottom: var(--space-lg); text-align: center; color: var(--text-light-color); font-size: var(--font-size-sm);">
+            Note: Categories with transaction history will be archived instead of deleted.
           </p>
           <div style="display: flex; gap: var(--space-md); justify-content: center;">
             <button id="confirm-delete-btn" class="btn btn-danger">Delete</button>
@@ -163,8 +166,15 @@ function attachListeners() {
           .getElementById("confirm-delete-btn")
           .addEventListener("click", async () => {
             try {
-              await deleteCategory(categoryId);
-              showToast("Category deleted successfully");
+              const response = await deleteCategory(categoryId);
+
+              // Show appropriate message based on action
+              if (response.action === "archived") {
+                showToast(`Category archived: ${response.reason}`, "info");
+              } else {
+                showToast("Category deleted successfully", "success");
+              }
+
               hideModal();
               renderList();
             } catch (error) {

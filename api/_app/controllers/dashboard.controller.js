@@ -23,8 +23,12 @@ exports.getDashboardData = async (req, res, next) => {
       budgetData,
       totalSpentData,
     ] = await Promise.all([
-      // getting total balance from all accounts
-      supabase.from("accounts").select("balance").eq("user_id", userId),
+      // getting total balance from all active (non-archived) accounts
+      supabase
+        .from("accounts")
+        .select("balance")
+        .eq("user_id", userId)
+        .eq("is_archived", false),
 
       // getting 5 most recent transactions
       supabase

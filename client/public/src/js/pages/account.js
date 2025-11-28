@@ -188,11 +188,14 @@ function attachListeners() {
 
       const accountId = listItem.dataset.id;
 
-      // handles account deletion
+      // handles account deletion or archiving
       if (target.closest(".delete-btn")) {
         const deleteContent = `
           <p style="margin-bottom: var(--space-lg); text-align: center;">
-            Are you sure you want to delete this account? This action cannot be undone.
+            Are you sure you want to delete this account?
+          </p>
+          <p style="margin-bottom: var(--space-lg); text-align: center; color: var(--text-light-color); font-size: var(--font-size-sm);">
+            Note: Accounts with balance or transaction history will be archived instead of deleted.
           </p>
           <div style="display: flex; gap: var(--space-md); justify-content: center;">
             <button id="confirm-delete-btn" class="btn btn-danger">Delete</button>
@@ -206,8 +209,15 @@ function attachListeners() {
           .getElementById("confirm-delete-btn")
           .addEventListener("click", async () => {
             try {
-              await deleteAccount(accountId);
-              showToast("Account deleted successfully");
+              const response = await deleteAccount(accountId);
+
+              // Show appropriate message based on action
+              if (response.action === "archived") {
+                showToast(`Account archived: ${response.reason}`, "info");
+              } else {
+                showToast("Account deleted successfully", "success");
+              }
+
               hideModal();
               renderList();
             } catch (error) {
@@ -231,4 +241,3 @@ function attachListeners() {
       }
     });
 }
-

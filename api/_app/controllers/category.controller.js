@@ -27,11 +27,17 @@ exports.createCategory = async (req, res, next) => {
 // retrieves all categories for the user
 exports.getCategory = async (req, res, next) => {
   const userID = req.user.id;
+  const includeArchived = req.query.include_archived === "true";
+
   try {
-    const { data, error } = await supabase
-      .from("categories")
-      .select("*")
-      .eq("user_id", userID);
+    let query = supabase.from("categories").select("*").eq("user_id", userID);
+
+    // By default, exclude archived categories
+    if (!includeArchived) {
+      query = query.eq("is_archived", false);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     res.status(200).json({ data });
@@ -44,12 +50,21 @@ exports.getCategory = async (req, res, next) => {
 exports.getCategoryByType = async (req, res, next) => {
   const userID = req.user.id;
   const { type } = req.params;
+  const includeArchived = req.query.include_archived === "true";
+
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from("categories")
       .select("*")
       .eq("user_id", userID)
       .eq("type", type);
+
+    // By default, exclude archived categories
+    if (!includeArchived) {
+      query = query.eq("is_archived", false);
+    }
+
+    const { data, error } = await query;
 
     if (error) throw error;
     res.status(200).json({ data });
@@ -94,15 +109,16 @@ exports.updateCategory = async (req, res, next) => {
   }
 };
 
-// deletes a category
+// deletes or archives a category
 exports.deleteCategory = async (req, res, next) => {
   const userId = req.user.id;
   const { id } = req.params;
 
   try {
+    // Get the category information
     const { data: existingCategory, error: findError } = await supabase
       .from("categories")
-      .select("id")
+      .select("id, name, type")
       .eq("id", id)
       .eq("user_id", userId)
       .single();
@@ -111,16 +127,50 @@ exports.deleteCategory = async (req, res, next) => {
       return res.status(404).json({ error: "Category not found" });
     }
 
-    const { data, error } = await supabase
-      .from("categories")
-      .delete()
-      .eq("id", id)
-      .select()
-      .single();
+    // Check if category has any transactions
+    const { data: transactions, error: transactionError } = await supabase
+      .from("transactions")
+      .select("id")
+      .eq("category_id", id)
+      .limit(1);
 
-    if (error) throw error;
+    if (transactionError) throw transactionError;
 
-    res.status(200).json({ message: "Category deleted successfully" });
+    const hasTransactions = transactions && transactions.length > 0;
+
+    if (hasTransactions) {
+      // Archive the category (soft delete)
+      const { data, error } = await supabase
+        .from("categories")
+        .update({ is_archived: true })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      res.status(200).json({
+        message: "Category archived successfully",
+        action: "archived",
+        reason: "Category has transaction history",
+        data,
+      });
+    } else {
+      // Permanently delete the category
+      const { data, error } = await supabase
+        .from("categories")
+        .delete()
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      res.status(200).json({
+        message: "Category deleted successfully",
+        action: "deleted",
+      });
+    }
   } catch (error) {
     next(error);
   }
