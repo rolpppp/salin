@@ -1,13 +1,66 @@
-# Application Test Checklist - Feature Branch Review
+# Comprehensive Test Checklist - salin Money Tracker
 
-**Branch**: `feature/dashboard-layout`  
-**Date**: November 23, 2025  
+**Branch**: `feature/transaction-sorting-pagination`  
+**Date**: December 4, 2025  
+**Test Environment**: http://localhost:8081
+
+## 🆕 New Features to Test (Priority)
+
+### ✅ 1. Transaction Sorting & Pagination
+
+- [ ] Click each column header (Date, Title, Amount, Account, Category)
+- [ ] Verify sort indicators (↑/↓) appear and toggle
+- [ ] Verify transactions reorder correctly
+- [ ] Test pagination with 30+ transactions
+- [ ] Click page numbers, Previous, Next buttons
+- [ ] Verify shows 25 items per page
+- [ ] Verify pagination info displays correctly
+- [ ] Verify page changes work without resetting
+- [ ] Test filtering + pagination together
+- [ ] Test sorting + pagination together
+
+### ✅ 2. Budget Delete Feature
+
+- [ ] Set a budget, open budget form
+- [ ] Verify "Delete Budget" button appears (red)
+- [ ] Click delete, verify confirmation dialog
+- [ ] Click "Cancel" - verify returns to form
+- [ ] Click delete and confirm - verify success
+- [ ] Verify dashboard updates to ₱0 / ₱0
+- [ ] Test with no budget - verify no delete button
+
+### ✅ 3. Budget Exceeded Warning
+
+- [ ] Set budget ₱800, spend ₱820
+- [ ] Verify alert banner appears at top
+- [ ] Verify red left border on budget card
+- [ ] Verify progress bar is red
+- [ ] Verify "Used: 103%" displays
+- [ ] Verify "Remaining: -₱20.00" in red
+- [ ] Test within budget - verify green/blue colors
+- [ ] Test at limit - verify no warning
+
+### ✅ 4. Desktop Responsive Layout
+
+- [ ] Test dashboard at 1024px+ width
+- [ ] Verify 900px max-width centered layout
+- [ ] Verify single-column vertical arrangement
+- [ ] Test transaction table on desktop
+- [ ] Verify all 7 columns visible
+- [ ] Test all pages on desktop
+- [ ] Verify proper spacing and readability
+
+---
+
+## Core Features Testing
+
 **Modified Files**:
 
-- `api/_app/controllers/user.controller.js`
-- `client/public/src/js/pages/dashboard.js`
-- `client/public/src/js/pages/account.js`
-- `client/public/src/js/pages/categories.js`
+- `client/public/src/js/pages/transaction.js` (sorting/pagination)
+- `client/public/src/js/components/BudgetForm.js` (delete)
+- `client/public/src/js/pages/dashboard.js` (exceeded warning)
+- `client/public/src/js/api.js` (deleteBudget API)
+- `client/public/src/styles/main.css` (responsive/styles)
 
 ---
 

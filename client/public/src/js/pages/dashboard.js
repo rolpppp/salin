@@ -67,10 +67,12 @@ export async function renderDashboardPage(app) {
 
     currentDashboardData = data;
     const displayName = user.username || user.email.split("@")[0];
+    const budgetAmount = data.budget?.amount || 0;
+    const budgetSpent = data.budget?.spent || 0;
     const budgetPercent =
-      data.budget && data.budget.amount > 0
-        ? (data.budget.spent / data.budget.amount) * 100
-        : 0;
+      budgetAmount > 0 ? (budgetSpent / budgetAmount) * 100 : 0;
+    const budgetRemaining = budgetAmount - budgetSpent;
+    const isBudgetExceeded = budgetAmount > 0 && budgetSpent > budgetAmount;
     const totalBalanceValue = data.totalBalance || 0;
 
     app.innerHTML = `
@@ -88,6 +90,20 @@ export async function renderDashboardPage(app) {
           cursor: pointer;">Categories</a>
         <button id="logout-btn" class="logout-btn">Logout</button>
       </header>
+
+      ${
+        isBudgetExceeded
+          ? `
+        <div class="alert alert-danger">
+          <div class="alert-icon">⚠️</div>
+          <div class="alert-content">
+            <strong>Budget Exceeded!</strong>
+            <p>You have exceeded your monthly budget by ₱${formatCurrency(Math.abs(budgetRemaining))}.</p>
+          </div>
+        </div>
+      `
+          : ""
+      }
 
       <div class="card balance-card">
         <div class="total-balance-display">
@@ -127,16 +143,32 @@ export async function renderDashboardPage(app) {
         </div>
       </div>
 
-      <div id="budget-card" class="card budget-card" style="cursor: pointer;">
+      <div id="budget-card" class="card budget-card ${isBudgetExceeded ? "budget-exceeded" : ""}" style="cursor: pointer;">
         <div class="budget-info">
           <span>Monthly Budget</span>
-          <span>₱${formatCurrency(data.budget?.spent || 0)} / ₱${formatCurrency(
-            data.budget?.amount || 0
-          )}</span>
+          <span>₱${formatCurrency(budgetSpent)} / ₱${formatCurrency(budgetAmount)}</span>
         </div>
         <div class="budget-progress">
-          <div class="budget-progress-bar" style="width: ${Math.min(budgetPercent, 100)}%"></div>
+          <div class="budget-progress-bar ${isBudgetExceeded ? "exceeded" : ""}" style="width: ${Math.min(budgetPercent, 100)}%"></div>
         </div>
+        ${
+          budgetAmount > 0
+            ? `
+          <div class="budget-details">
+            <div class="budget-detail-item">
+              <span class="budget-detail-label">Used</span>
+              <span class="budget-detail-value">${budgetPercent.toFixed(0)}%</span>
+            </div>
+            <div class="budget-detail-item">
+              <span class="budget-detail-label">Remaining</span>
+              <span class="budget-detail-value ${isBudgetExceeded ? "text-danger" : "text-success"}">
+                ${budgetRemaining >= 0 ? "" : "-"}₱${formatCurrency(Math.abs(budgetRemaining))}
+              </span>
+            </div>
+          </div>
+        `
+            : ""
+        }
       </div>
 
       <div class="card">

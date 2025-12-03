@@ -241,6 +241,13 @@ export function updateBudget(id, budgetData) {
   });
 }
 
+export function deleteBudget(id) {
+  return request(`/budget/${id}`, {
+    method: "DELETE",
+    headers: getAuthHeaders(),
+  });
+}
+
 // --- Parsing Endpoint ---
 
 export function parseText(text) {
