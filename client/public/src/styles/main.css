@@ -995,9 +995,16 @@ select.form-control {
 /* ==========================================================================
    TABLES
    ========================================================================== */
+.transactions-table-wrapper {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  width: 100%;
+}
+
 .transactions-table {
   width: 100%;
   border-collapse: collapse;
+  min-width: 800px;
 }
 
 .transactions-table thead {
@@ -1274,6 +1281,21 @@ select.form-control {
     max-width: 900px;
     margin: 0 auto;
     padding: var(--space-xl) var(--space-2xl);
+  }
+
+  /* Wider layout for transactions page */
+  #app:has(.transactions-table) {
+    max-width: 1400px;
+  }
+
+  /* Remove extra padding from card containing table */
+  .card:has(.transactions-table-wrapper) {
+    padding: 0;
+    overflow: hidden;
+  }
+
+  .card .transactions-table-wrapper {
+    margin: 0;
   }
 
   /* Balance card desktop improvements */
