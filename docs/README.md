@@ -2,13 +2,13 @@
 
 ## About This Documentation
 
-The documentation files in this folder were created with the assistance of Large Language Models (LLMs), specifically GitHub Copilot, to help accelerate the development and documentation process of the Salin project.
+The documentation files in this folder were created with the assistance of Large Language Models (LLMs), specifically GitHub Copilot, to help accelerate the development and documentation process of the salin project.
 
 ### What This Means
 
 - **AI-Assisted Writing**: These documents were generated or significantly enhanced using AI assistance to ensure comprehensive coverage of features, fixes, and implementation details.
 
-- **Human Oversight**: While AI was used to draft and structure the documentation, all content has been reviewed, validated, and approved by the human developer(s) working on this project.
+- **Human Oversight**: While AI was used to draft and structure the documentation, all content has been reviewed, validated, and approved by the developer working on this project.
 
 - **Accuracy**: We strive to keep this documentation accurate and up-to-date. If you find any discrepancies or errors, please open an issue or submit a pull request.
 

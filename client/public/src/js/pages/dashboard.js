@@ -5,6 +5,7 @@ import { openBudgetForm } from "../components/BudgetForm.js";
 import { openParseReviewModal } from "../components/ParseReview.js";
 import { openFeedbackForm } from "../components/FeedbackForm.js";
 import { formatCurrency } from "../utils.js";
+import { clearAuthData } from "../utils/storage.js";
 
 let currentDashboardData = {};
 
@@ -17,12 +18,12 @@ function getAccountIcon(type) {
     credit_card: "credit_card.svg",
   };
 
-  // Check for exact match first
+  // check for exact match first
   if (typeMap[type.toLowerCase()]) {
     return typeMap[type.toLowerCase()];
   }
 
-  // Check for substring matches for custom types
+  // check for substring matches for custom types
   const lowerType = type.toLowerCase();
   if (lowerType.includes("cash")) return "cash.svg";
   if (lowerType.includes("bank")) return "bank.svg";
@@ -30,7 +31,7 @@ function getAccountIcon(type) {
     return "e-wallet.svg";
   if (lowerType.includes("credit")) return "credit_card.svg";
 
-  // Default to cash icon
+  // default to cash icon
   return "cash.svg";
 }
 
@@ -276,7 +277,7 @@ function renderRecentTransactions(transactions) {
 function attachDashboardListeners() {
   const logoutBtn = document.getElementById("logout-btn");
   logoutBtn.addEventListener("click", () => {
-    localStorage.clear();
+    clearAuthData();
     window.location.hash = "#/login";
   });
 

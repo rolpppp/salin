@@ -1,3 +1,5 @@
+import { getAuthToken, clearAuthData, getUserId } from "./utils/storage.js";
+
 const isLocal =
   window.location.hostname === "localhost" ||
   window.location.hostname === "127.0.0.1" ||
@@ -23,12 +25,22 @@ async function request(endpoint, options = {}) {
     const data = await response.json();
 
     if (!response.ok) {
-      // handle 401 Unauthorized - clear storage and redirect to login
+      // handle 401 Unauthorized - only clear session if not a login/register endpoint
       if (response.status === 401) {
-        console.warn("Session expired or invalid. Logging out...");
-        localStorage.clear();
-        window.location.hash = "#/login";
-        throw new Error("Session expired. Please login again.");
+        const isAuthEndpoint = endpoint.includes('/auth/login') || 
+                               endpoint.includes('/auth/register') || 
+                               endpoint.includes('/auth/forgot-password');
+        
+        if (!isAuthEndpoint) {
+          // session expired for authenticated endpoints
+          console.warn("Session expired or invalid. Logging out...");
+          clearAuthData();
+          window.location.hash = "#/login";
+          throw new Error("Session expired. Please login again.");
+        }
+        
+        // for login/register, just throw the error message from backend
+        throw new Error(data.error || "Invalid credentials");
       }
 
       throw new Error(
@@ -43,16 +55,13 @@ async function request(endpoint, options = {}) {
 }
 
 // --- Auth Endpoints ---
-export async function loginUser(email, password) {
+export async function loginUser(email, password, rememberMe = false) {
   const response = await request("/auth/login", {
     method: "POST",
-    body: JSON.stringify({ email, password }),
+    body: JSON.stringify({ email, password, rememberMe }),
   });
 
-  if (response.user) {
-    localStorage.setItem("user_id", response.user.id);
-  }
-
+  // note: storage handling is done in the login page using setAuthData utility
   return response;
 }
 
@@ -93,10 +102,7 @@ export async function handleOAuthCallback(access_token, refresh_token) {
     body: JSON.stringify({ access_token, refresh_token }),
   });
 
-  if (response.user) {
-    localStorage.setItem("user_id", response.user.id);
-  }
-
+  // note: storage handling is done in callback page using setAuthData utility
   return response;
 }
 
@@ -118,11 +124,11 @@ export function updateUser(username) {
 
 // --- Getting User ID ---
 export function getUserID() {
-  return localStorage.getItem("user_id");
+  return getUserId();
 }
 // --- Dashboard Endpoints ---
 export function getDashboardData() {
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
   if (!token) throw new Error("No auth token found.");
 
   return request("/dashboard", {
@@ -131,7 +137,7 @@ export function getDashboardData() {
 }
 
 function getAuthHeaders() {
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
   if (!token) throw new Error("No auth token found.");
   return { Authorization: `Bearer ${token}` };
 }
@@ -154,7 +160,7 @@ export function getCurrentBudget() {
 }
 
 export function getTransactions(filters = {}) {
-  const token = localStorage.getItem("token");
+  const token = getAuthToken();
   if (!token) throw new Error("No auth token found.");
 
   const query = new URLSearchParams(filters).toString();

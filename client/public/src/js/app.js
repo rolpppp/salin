@@ -25,6 +25,7 @@ import { renderForgotPasswordPage } from "./pages/auth/forgotPassword.js";
 import { renderResetPasswordPage } from "./pages/auth/resetPassword.js";
 import { renderOnboardingPage } from "./pages/onboarding.js";
 import { renderOAuthCallbackPage } from "./pages/auth/callback.js";
+import { getAuthToken } from "./utils/storage.js";
 
 const app = document.getElementById("app");
 
@@ -33,8 +34,8 @@ function router() {
   const path = window.location.hash || "#/login";
   app.innerHTML = '<div class="loading-spinner"></div>'; // show loading spinner on page change
 
-  // check if user is authenticated
-  const token = localStorage.getItem("token");
+  // check if user is authenticated (checks both localStorage and sessionStorage)
+  const token = getAuthToken();
 
   // handle reset password page first (before auth checks)
   // this includes both direct navigation and supabase recovery links with tokens

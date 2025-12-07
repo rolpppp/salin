@@ -1,5 +1,6 @@
 import { handleOAuthCallback } from "../../api.js";
 import { showToast } from "../../components/Toast.js";
+import { setAuthData } from "../../utils/storage.js";
 
 // renders the oauth callback page (shown while processing oauth response)
 export function renderOAuthCallbackPage(app) {
@@ -71,9 +72,8 @@ async function processOAuthCallback() {
     // send tokens to backend for validation and session creation
     const response = await handleOAuthCallback(access_token, refresh_token);
 
-    // store user data and token
-    localStorage.setItem("token", response.token);
-    localStorage.setItem("user", JSON.stringify(response.user));
+    // store user data and token (default to localStorage for OAuth logins)
+    setAuthData(response.token, response.user, true);
 
     // check if user needs onboarding (check if they have set up their username and have accounts)
     if (!response.user.username) {

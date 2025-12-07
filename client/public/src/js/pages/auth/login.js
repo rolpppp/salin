@@ -1,5 +1,6 @@
 import { loginUser, registerUser, googleSignIn } from "../../api.js";
 import { showToast } from "../../components/Toast.js";
+import { setAuthData } from "../../utils/storage.js";
 
 // renders the authentication form based on whether it's for login or registration
 function renderAuthForm(isLogin) {
@@ -47,6 +48,18 @@ function renderAuthForm(isLogin) {
                 <line class="eye-closed" x1="1" y1="1" x2="23" y2="23" style="display:none;"></line>
               </svg>
             </span>
+          </div>
+          `
+              : ""
+          }
+          ${
+            isLogin
+              ? `
+          <div class="remember-me-container">
+            <label class="remember-me-label">
+              <input type="checkbox" id="remember-me" class="remember-me-checkbox">
+              <span>Remember me for 7 days</span>
+            </label>
           </div>
           `
               : ""
@@ -158,9 +171,14 @@ function attachFormListeners(app, isLogin) {
     try {
       let data;
       if (isLogin) {
-        data = await loginUser(email, password);
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        // get the Remember Me checkbox value
+        const rememberMe = document.getElementById("remember-me").checked;
+        
+        data = await loginUser(email, password, rememberMe);
+        
+        // use storage utility to save auth data in appropriate storage
+        setAuthData(data.token, data.user, rememberMe);
+        
         window.location.hash = "#/dashboard";
       } else {
         data = await registerUser(email, password);
@@ -169,8 +187,8 @@ function attachFormListeners(app, isLogin) {
           "success"
         );
         // after successful registration, redirect to onboarding page
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("user", JSON.stringify(data.user));
+        // default to sessionStorage for new registrations
+        setAuthData(data.token, data.user, false);
         window.location.hash = "#/onboarding";
       }
     } catch (error) {

@@ -61,7 +61,7 @@ exports.registerUser = async (req, res, next) => {
 
 // login new user
 exports.loginUser = async (req, res, next) => {
-  const { email, password } = req.body;
+  const { email, password, rememberMe } = req.body;
 
   if (!email || !password) {
     return res.status(400).json({ error: "Email and password are required" });
@@ -87,8 +87,12 @@ exports.loginUser = async (req, res, next) => {
           .json({ error: "Authentication not configured." });
       }
 
+      // set token expiration based on rememberMe option
+      // 7 days if rememberMe is true, 1 day otherwise
+      const expiresIn = rememberMe ? "7d" : "1d";
+
       const token = jwt.sign(payload, process.env.JWT_SECRET, {
-        expiresIn: "1d", // token expires in 1 day
+        expiresIn,
       });
 
       res.status(200).json({

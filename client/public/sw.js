@@ -1,5 +1,5 @@
 // define the cache name and the urls to cache
-const CACHE_NAME = "salin-cache-v1";
+const CACHE_NAME = "salin-cache-v2"; // updated version for Remember Me feature
 const urlsToCache = [
   "/",
   "/index.html",
@@ -8,6 +8,7 @@ const urlsToCache = [
   "/src/styles/variables.css",
   "/src/js/app.js",
   "/src/js/api.js",
+  "/src/js/utils/storage.js",
   "/assets/icons/salin.png",
   "/assets/icons/icon-192.png",
 ];
