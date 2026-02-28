@@ -47,10 +47,15 @@ exports.createTransaction = async (req, res, next) => {
   }
 };
 
-// get all transactions
+// get transactions with server-side pagination
 exports.getTransactions = async (req, res, next) => {
   const userId = req.user.id;
-  const { startDate, endDate, type, categoryId, accountId, search } = req.query; //filtering or sorting
+  const { startDate, endDate, type, categoryId, accountId, search } = req.query;
+
+  const page = Math.max(1, parseInt(req.query.page) || 1);
+  const limit = Math.min(100, Math.max(1, parseInt(req.query.limit) || 25));
+  const from = (page - 1) * limit;
+  const to = from + limit - 1;
 
   try {
     let query = supabase
@@ -61,8 +66,10 @@ exports.getTransactions = async (req, res, next) => {
         categories(name),
         accounts(name)
         `,
+        { count: "exact" }
       )
       .eq("user_id", userId)
+      .order("date", { ascending: false })
       .order("created_at", { ascending: false });
 
     if (startDate) query = query.gte("date", startDate);
@@ -72,11 +79,19 @@ exports.getTransactions = async (req, res, next) => {
     if (accountId) query = query.eq("account_id", accountId);
     if (search) query = query.ilike("title", `%${search}%`);
 
-    const { data, error } = await query;
+    query = query.range(from, to);
+
+    const { data, error, count } = await query;
 
     if (error) throw error;
 
-    res.status(200).json(data);
+    res.status(200).json({
+      data,
+      total: count,
+      page,
+      limit,
+      totalPages: Math.ceil(count / limit),
+    });
   } catch (error) {
     next(error);
   }

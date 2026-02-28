@@ -159,13 +159,13 @@ export function getCurrentBudget() {
   return request("/budget/current", { headers: getAuthHeaders() });
 }
 
-export function getTransactions(filters = {}) {
+export function getTransactions(filters = {}, page = 1, limit = 25) {
   const token = getAuthToken();
   if (!token) throw new Error("No auth token found.");
 
-  const query = new URLSearchParams(filters).toString();
+  const params = new URLSearchParams({ ...filters, page, limit }).toString();
 
-  return request(`/transactions?${query}`, {
+  return request(`/transactions?${params}`, {
     headers: { Authorization: `Bearer ${token}` },
   });
 }

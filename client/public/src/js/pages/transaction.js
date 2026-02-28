@@ -8,25 +8,32 @@ import {
   deleteTransaction,
 } from "../api.js";
 
-let allTransactions = []; //store full list for filtering
+let allTransactions = []; // current page data
 let categories = [];
 let accounts = [];
 let currentPage = 1;
-let itemsPerPage = 25;
+let totalPages = 1;
+let totalItems = 0;
+const itemsPerPage = 25;
 let sortColumn = "date";
 let sortDirection = "desc";
+let activeFilters = {}; // persisted across page changes
 
 export async function renderTransactionsPage(app) {
   app.innerHTML = '<div class="loading-spinner"></div>';
 
   try {
     const [transactionsResponse, categoriesResponse, accountsResponse] =
-      await Promise.all([getTransactions(), getCategories(), getAccounts()]);
+      await Promise.all([
+        getTransactions(activeFilters, currentPage, itemsPerPage),
+        getCategories(),
+        getAccounts(),
+      ]);
 
-    // Handle different response formats (array vs {data: array})
-    allTransactions = Array.isArray(transactionsResponse)
-      ? transactionsResponse
-      : transactionsResponse?.data || [];
+    // Server returns { data, total, page, limit, totalPages }
+    allTransactions = transactionsResponse?.data || [];
+    totalItems = transactionsResponse?.total || 0;
+    totalPages = transactionsResponse?.totalPages || 1;
 
     categories = Array.isArray(categoriesResponse)
       ? { data: categoriesResponse }
@@ -36,7 +43,6 @@ export async function renderTransactionsPage(app) {
       ? { data: accountsResponse }
       : accountsResponse;
 
-    // Validate data
     if (!Array.isArray(allTransactions)) {
       throw new Error("Failed to load transactions");
     }
@@ -131,6 +137,9 @@ export async function renderTransactionsPage(app) {
         `;
 
     currentPage = 1;
+    totalPages = transactionsResponse?.totalPages || 1;
+    totalItems = transactionsResponse?.total || 0;
+    activeFilters = {};
     sortColumn = "date";
     sortDirection = "desc";
     renderTransactionsList(allTransactions);
@@ -200,7 +209,6 @@ function attachFilterListeners() {
     }
 
     // --- EDIT LOGIC ---
-    // Check if edit button or its child elements were clicked
     const editBtn = target.closest(".edit-btn");
     if (editBtn) {
       const transactionToEdit = allTransactions.find(
@@ -214,30 +222,28 @@ function attachFilterListeners() {
       }
     }
   });
-  const applyFiltersAndRender = (resetPage = true) => {
-    const filters = {
-      search: searchInput.value.toLowerCase(),
-      category: categorySelect.value,
-      startDate: startDateInput.value,
-      endDate: endDateInput.value,
-    };
+  const applyFiltersAndRender = async (resetPage = true) => {
+    if (resetPage) currentPage = 1;
 
-    const filtered = allTransactions.filter((t) => {
-      if (filters.search && !t.title.toLowerCase().includes(filters.search))
-        return false;
-      if (filters.category && t.category_id !== filters.category) return false;
-      if (filters.startDate && t.date < filters.startDate) return false;
-      if (filters.endDate && t.date > filters.endDate) return false;
-      return true;
-    });
+    // Build server-compatible filter params
+    activeFilters = {};
+    if (searchInput.value.trim()) activeFilters.search = searchInput.value.trim();
+    if (categorySelect.value) activeFilters.categoryId = categorySelect.value;
+    if (startDateInput.value) activeFilters.startDate = startDateInput.value;
+    if (endDateInput.value) activeFilters.endDate = endDateInput.value;
 
-    if (resetPage) {
-      currentPage = 1; // Reset to first page when filtering, but not when paginating
+    try {
+      const response = await getTransactions(activeFilters, currentPage, itemsPerPage);
+      allTransactions = response?.data || [];
+      totalItems = response?.total || 0;
+      totalPages = response?.totalPages || 1;
+      renderTransactionsList(allTransactions);
+    } catch (err) {
+      showToast("Failed to load transactions.", "error");
     }
-    renderTransactionsList(filtered);
   };
 
-  // Store the function globally for sort listeners
+  // Store the function globally for sort listeners and pagination
   window.applyFiltersAndRender = applyFiltersAndRender;
 
   [searchInput, categorySelect, startDateInput, endDateInput].forEach((el) => {
@@ -303,15 +309,6 @@ function renderTransactionsList(list) {
     return;
   }
 
-  // Sort transactions
-  const sortedList = sortTransactions(list);
-
-  // Calculate pagination
-  const totalPages = Math.ceil(sortedList.length / itemsPerPage);
-  const startIndex = (currentPage - 1) * itemsPerPage;
-  const endIndex = startIndex + itemsPerPage;
-  const paginatedList = sortedList.slice(startIndex, endIndex);
-
   // Update sort indicators
   document.querySelectorAll(".sort-indicator").forEach((indicator) => {
     indicator.textContent = "";
@@ -324,8 +321,8 @@ function renderTransactionsList(list) {
     indicator.textContent = sortDirection === "asc" ? " ↑" : " ↓";
   }
 
-  // Render transactions
-  paginatedList.forEach((t) => {
+  // Server already returns the correct page — render directly
+  list.forEach((t) => {
     // determine the class based on transaction type
     const typeClass = t.type === "income" ? "income" : "expense";
 
@@ -371,9 +368,9 @@ function renderTransactionsList(list) {
         `;
   });
 
-  // Render pagination
+  // Render server-side pagination controls
   if (totalPages > 1) {
-    renderPagination(totalPages, sortedList.length);
+    renderPagination(totalPages, totalItems);
   }
 }
 
@@ -439,12 +436,12 @@ function renderPagination(totalPages, totalItems) {
 
   // Attach pagination listeners
   container.querySelectorAll(".pagination-btn").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
+    btn.addEventListener("click", () => {
       if (btn.disabled) return;
       const page = parseInt(btn.dataset.page);
       if (page && page !== currentPage && !isNaN(page)) {
         currentPage = page;
-        window.applyFiltersAndRender(false); // Don't reset page when paginating
+        window.applyFiltersAndRender(false); // keep filters, just change page
       }
     });
   });
@@ -456,16 +453,14 @@ function attachSortListeners() {
       const column = header.dataset.column;
 
       if (sortColumn === column) {
-        // Toggle direction if same column
         sortDirection = sortDirection === "asc" ? "desc" : "asc";
       } else {
-        // New column, default to descending
         sortColumn = column;
         sortDirection = "desc";
       }
 
-      currentPage = 1; // Reset to first page when sorting
-      applyFiltersAndRender();
+      currentPage = 1;
+      window.applyFiltersAndRender(true);
     });
   });
 }
