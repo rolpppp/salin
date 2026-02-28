@@ -352,7 +352,7 @@ function renderTransactionsList(list) {
                 }₱${formattedAmount}</td>
                 <td>${accountName}</td>
                 <td>${categoryName}</td>
-                <td>${description}</td>
+                <td>${description}${t.split_with ? `<br><span class="split-badge">split w/ ${t.split_with}</span>` : ""}</td>
                 <td>
                     <div class="item-actions">
                         <button class="edit-btn">

@@ -155,6 +155,19 @@ function openTransactionFormWithData(
             </div>
             ` : ""}
 
+            ${type === "expense" ? `
+            <div class="form-group recurring-group">
+                <label class="toggle-label">
+                    <input type="checkbox" id="is-split">
+                    <span>Split this expense</span>
+                </label>
+                <div id="split-fields" style="display:none; margin-top: var(--space-xs); display: none;">
+                    <input type="text" id="split-with" class="form-control" placeholder="Split with (e.g., John)" style="margin-bottom: var(--space-xs);">
+                    <input type="number" id="split-amount" class="form-control" step="0.01" placeholder="Their share amount (₱)">
+                </div>
+            </div>
+            ` : ""}
+
             <button type="submit" class="btn btn-primary" style="width: 100%;">${
               isEdit ? "Save Changes" : "Save Transaction"
             }</button>
@@ -169,6 +182,15 @@ function openTransactionFormWithData(
     const intervalSelect = document.getElementById("recurrence-interval");
     recurringCheckbox.addEventListener("change", () => {
       intervalSelect.style.display = recurringCheckbox.checked ? "block" : "none";
+    });
+  }
+
+  // Show/hide split fields
+  const splitCheckbox = document.getElementById("is-split");
+  if (splitCheckbox) {
+    const splitFields = document.getElementById("split-fields");
+    splitCheckbox.addEventListener("change", () => {
+      splitFields.style.display = splitCheckbox.checked ? "block" : "none";
     });
   }
 
@@ -205,6 +227,17 @@ function attachFormSubmitListener(transactionId = null) {
       ...(isRecurring ? { recurrence_interval: recurrenceInterval } : {}),
       // Idempotency key: generated once per form open, prevents double-submit
       ...(!transactionId ? { idempotency_key: crypto.randomUUID() } : {}),
+      // Expense splitting
+      ...(() => {
+        const splitCheckboxEl = document.getElementById("is-split");
+        if (splitCheckboxEl?.checked) {
+          return {
+            split_with: document.getElementById("split-with")?.value || null,
+            split_amount: parseFloat(document.getElementById("split-amount")?.value) || null,
+          };
+        }
+        return {};
+      })(),
     };
 
     try {

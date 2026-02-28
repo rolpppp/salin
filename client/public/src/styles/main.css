@@ -1846,6 +1846,18 @@ body.page-transactions .fab {
   display: none;
 }
 
+/* Split expense badge */
+.split-badge {
+  display: inline-block;
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-radius: var(--border-radius-full);
+  margin-top: 2px;
+  font-weight: 500;
+}
+
 /* Recurring toggle in TransactionForm */
 .recurring-group .toggle-label {
   display: flex;
