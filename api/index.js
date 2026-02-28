@@ -3,21 +3,52 @@ require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
 const serverless = require("serverless-http");
+const rateLimit = require("express-rate-limit");
 const app = express();
 
 // middleware
 app.use(cors()); // enable frontend-to-backend communication
 app.use(express.json()); // allow for reading json requests
 
+// --- Rate Limiting ---
+// Global limit: 100 requests per 15 minutes per IP
+const globalLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many requests. Please try again in a few minutes." },
+});
+
+// Strict limit for auth endpoints (brute-force protection)
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Too many login attempts. Please wait 15 minutes." },
+});
+
+// Strict limit for AI parsing (Gemini API cost protection)
+const parseLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { error: "Parse limit reached. Please wait before parsing more text." },
+});
+
+app.use(globalLimiter);
+
 // api routes
 app.use("/api/config", require("./_app/routes/config.routes.js"));
-app.use("/api/auth", require("./_app/routes/auth.routes.js"));
+app.use("/api/auth", authLimiter, require("./_app/routes/auth.routes.js"));
 app.use("/api/user", require("./_app/routes/user.routes.js"));
 app.use("/api/transactions", require("./_app/routes/transaction.routes.js"));
 app.use("/api/accounts", require("./_app/routes/account.routes.js"));
 app.use("/api/budget", require("./_app/routes/budget.routes.js"));
 app.use("/api/categories", require("./_app/routes/category.routes.js"));
-app.use("/api/parse", require("./_app/routes/parsing.routes.js"));
+app.use("/api/parse", parseLimiter, require("./_app/routes/parsing.routes.js"));
 app.use("/api/dashboard", require("./_app/routes/dashboard.routes.js"));
 app.use("/api/feedback", require("./_app/routes/feedback.routes.js"));
 app.use("/api/push", require("./_app/routes/push.routes.js"));
