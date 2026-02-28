@@ -77,6 +77,10 @@ function router() {
   // start realtime subscriptions when on an authenticated page
   if (token) {
     initRealtime();
+    // inject FAB after page renders
+    requestAnimationFrame(injectFAB);
+  } else {
+    removeFAB();
   }
 
   // route to the correct page
@@ -134,6 +138,29 @@ export function renderErrorPage(
         </div>
     `;
   document.getElementById("retry-btn").addEventListener("click", router);
+}
+
+// ============================================================
+// Floating Action Button (FAB) — Quick-Add Transaction
+// ============================================================
+function injectFAB() {
+  if (document.getElementById("fab-quick-add")) return; // already present
+
+  const fab = document.createElement("button");
+  fab.id = "fab-quick-add";
+  fab.className = "fab";
+  fab.setAttribute("aria-label", "Quick add transaction");
+  fab.textContent = "+";
+  document.body.appendChild(fab);
+
+  fab.addEventListener("click", async () => {
+    const { openTransactionForm } = await import("./components/TransactionForm.js");
+    openTransactionForm("expense");
+  });
+}
+
+function removeFAB() {
+  document.getElementById("fab-quick-add")?.remove();
 }
 
 // listen for hash changes to navigate

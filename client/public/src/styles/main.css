@@ -1807,3 +1807,57 @@ html {
     max-width: 120px;
   }
 }
+
+/* ==========================================================================
+   FLOATING ACTION BUTTON (FAB) — Quick-Add Transaction
+   ========================================================================== */
+.fab {
+  position: fixed;
+  bottom: calc(1.5rem + env(safe-area-inset-bottom));
+  right: 1.5rem;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  color: #fff;
+  border: none;
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(79, 70, 229, 0.45);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  z-index: 500;
+}
+
+.fab:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 20px rgba(79, 70, 229, 0.6);
+}
+
+.fab:active {
+  transform: scale(0.96);
+}
+
+/* hide FAB on the transactions full-page table to avoid z-index issues */
+body.page-transactions .fab {
+  display: none;
+}
+
+/* Recurring toggle in TransactionForm */
+.recurring-group .toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  color: var(--text-light-color);
+}
+
+.recurring-group input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
