@@ -141,6 +141,20 @@ function openTransactionFormWithData(
                 }</textarea>
             </div>
 
+            ${!isEdit ? `
+            <div class="form-group recurring-group">
+                <label class="toggle-label">
+                    <input type="checkbox" id="is-recurring" ${transactionToEdit?.is_recurring ? "checked" : ""}>
+                    <span>Repeat this transaction</span>
+                </label>
+                <select id="recurrence-interval" class="form-control" style="display:none; margin-top: var(--space-xs);">
+                    <option value="daily">Every day</option>
+                    <option value="weekly">Every week</option>
+                    <option value="monthly" selected>Every month</option>
+                </select>
+            </div>
+            ` : ""}
+
             <button type="submit" class="btn btn-primary" style="width: 100%;">${
               isEdit ? "Save Changes" : "Save Transaction"
             }</button>
@@ -148,6 +162,16 @@ function openTransactionFormWithData(
     `;
 
   showModal(title, formContentHTML);
+
+  // Show/hide interval selector when recurring toggle changes
+  const recurringCheckbox = document.getElementById("is-recurring");
+  if (recurringCheckbox) {
+    const intervalSelect = document.getElementById("recurrence-interval");
+    recurringCheckbox.addEventListener("change", () => {
+      intervalSelect.style.display = recurringCheckbox.checked ? "block" : "none";
+    });
+  }
+
   attachFormSubmitListener(isEdit ? transactionToEdit.id : null);
 }
 
@@ -163,6 +187,12 @@ function attachFormSubmitListener(transactionId = null) {
     submitBtn.classList.add("btn-loading");
     submitBtn.disabled = true;
 
+    const isRecurringEl = document.getElementById("is-recurring");
+    const isRecurring = isRecurringEl ? isRecurringEl.checked : false;
+    const recurrenceInterval = isRecurring
+      ? document.getElementById("recurrence-interval")?.value
+      : undefined;
+
     const transactionData = {
       type: document.getElementById("transaction-type").value,
       title: document.getElementById("title").value,
@@ -171,6 +201,8 @@ function attachFormSubmitListener(transactionId = null) {
       account_id: document.getElementById("account").value,
       date: document.getElementById("date").value,
       description: document.getElementById("description").value || null,
+      is_recurring: isRecurring,
+      ...(isRecurring ? { recurrence_interval: recurrenceInterval } : {}),
     };
 
     try {

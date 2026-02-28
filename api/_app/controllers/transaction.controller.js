@@ -1,10 +1,29 @@
 const supabase = require("../config/supabase.js");
 
+// compute the next recurrence date from a given date string
+function computeNextRecurrence(dateStr, interval) {
+  const d = new Date(dateStr);
+  if (interval === "daily") d.setDate(d.getDate() + 1);
+  else if (interval === "weekly") d.setDate(d.getDate() + 7);
+  else if (interval === "monthly") d.setMonth(d.getMonth() + 1);
+  return d.toISOString().split("T")[0]; // YYYY-MM-DD
+}
+
 // create new transaction
 exports.createTransaction = async (req, res, next) => {
   const userId = req.user.id;
-  const { title, amount, type, date, description, account_id, category_id } =
-    req.body;
+  const {
+    title,
+    amount,
+    type,
+    date,
+    description,
+    account_id,
+    category_id,
+    is_recurring = false,
+    recurrence_interval,
+    idempotency_key,
+  } = req.body;
 
   // validation
   if (!title || !amount || !type || !date || !account_id || !category_id) {
@@ -15,7 +34,18 @@ exports.createTransaction = async (req, res, next) => {
     });
   }
 
+  if (is_recurring && !recurrence_interval) {
+    return res.status(400).json({
+      error: "recurrence_interval is required when is_recurring is true",
+    });
+  }
+
   try {
+    const next_recurrence_date =
+      is_recurring && recurrence_interval
+        ? computeNextRecurrence(date, recurrence_interval)
+        : null;
+
     const { data, error } = await supabase
       .from("transactions")
       .insert({
@@ -27,6 +57,10 @@ exports.createTransaction = async (req, res, next) => {
         description,
         account_id,
         category_id,
+        is_recurring,
+        recurrence_interval: is_recurring ? recurrence_interval : null,
+        next_recurrence_date,
+        ...(idempotency_key ? { idempotency_key } : {}),
       })
       .select()
       .single();
