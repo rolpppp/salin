@@ -140,4 +140,55 @@ export function renderErrorPage(
 window.addEventListener("hashchange", router);
 
 // initial page load
-window.addEventListener("DOMContentLoaded", router);
+window.addEventListener("DOMContentLoaded", () => {
+  router();
+  initOfflineBanner();
+});
+
+// ============================================================
+// Offline / Online Banner
+// ============================================================
+function initOfflineBanner() {
+  const banner = document.createElement("div");
+  banner.id = "offline-banner";
+  banner.setAttribute("aria-live", "polite");
+  banner.style.cssText = `
+    display: none;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #1e293b;
+    color: #f1f5f9;
+    text-align: center;
+    padding: 0.6rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    z-index: 9999;
+  `;
+  document.body.appendChild(banner);
+
+  function showOffline() {
+    banner.textContent = "You're offline. Changes will sync when connected.";
+    banner.style.display = "block";
+  }
+
+  function showOnline() {
+    banner.textContent = "Back online! Syncing saved changes…";
+    banner.style.display = "block";
+    setTimeout(() => { banner.style.display = "none"; }, 3000);
+  }
+
+  if (!navigator.onLine) showOffline();
+  window.addEventListener("offline", showOffline);
+  window.addEventListener("online", showOnline);
+
+  // Respond to service worker telling us a sync completed
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.addEventListener("message", (e) => {
+      if (e.data?.type === "salin:sync-complete") {
+        window.dispatchEvent(new CustomEvent("transactionsUpdated"));
+      }
+    });
+  }
+}

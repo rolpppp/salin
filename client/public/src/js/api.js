@@ -1,4 +1,5 @@
 import { getAuthToken, clearAuthData, getUserId } from "./utils/storage.js";
+import { enqueue } from "./offline-queue.js";
 
 const isLocal =
   window.location.hostname === "localhost" ||
@@ -12,13 +13,33 @@ const API_BASE_URL = isLocal
   ? `http://${window.location.hostname}:3000/api`
   : "/api";
 
+const MUTATION_METHODS = ["POST", "PUT", "PATCH", "DELETE"];
+
 async function request(endpoint, options = {}) {
   const url = `${API_BASE_URL}${endpoint}`;
+  const method = (options.method || "GET").toUpperCase();
 
   options.headers = {
     "Content-Type": "application/json",
     ...options.headers,
   };
+
+  // Queue mutation requests when offline instead of failing
+  if (!navigator.onLine && MUTATION_METHODS.includes(method)) {
+    try {
+      await enqueue({ url, method, headers: options.headers, body: options.body });
+      // Register Background Sync so SW replays when connectivity returns
+      if ("serviceWorker" in navigator && "SyncManager" in window) {
+        const reg = await navigator.serviceWorker.ready;
+        await reg.sync.register("salin-sync");
+      }
+      // Dispatch event so UI can show optimistic feedback
+      window.dispatchEvent(new CustomEvent("salin:queued", { detail: { url, method } }));
+      return { queued: true, message: "Saved offline. Will sync when connected." };
+    } catch {
+      throw new Error("You are offline. Could not save for later.");
+    }
+  }
 
   try {
     const response = await fetch(url, options);
