@@ -41,6 +41,23 @@ exports.createTransaction = async (req, res, next) => {
   }
 
   try {
+    // Idempotency check: return existing transaction if key already used
+    if (idempotency_key) {
+      const { data: existing } = await supabase
+        .from("transactions")
+        .select()
+        .eq("idempotency_key", idempotency_key)
+        .eq("user_id", userId)
+        .maybeSingle();
+
+      if (existing) {
+        return res.status(200).json({
+          message: "Transaction already exists (idempotency key matched).",
+          transaction: existing,
+        });
+      }
+    }
+
     const next_recurrence_date =
       is_recurring && recurrence_interval
         ? computeNextRecurrence(date, recurrence_interval)

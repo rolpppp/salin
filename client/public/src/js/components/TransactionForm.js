@@ -203,6 +203,8 @@ function attachFormSubmitListener(transactionId = null) {
       description: document.getElementById("description").value || null,
       is_recurring: isRecurring,
       ...(isRecurring ? { recurrence_interval: recurrenceInterval } : {}),
+      // Idempotency key: generated once per form open, prevents double-submit
+      ...(!transactionId ? { idempotency_key: crypto.randomUUID() } : {}),
     };
 
     try {
