@@ -98,16 +98,16 @@ exports.getTransactions = async (req, res, next) => {
 };
 
 // update a transaction
+// Balance is updated atomically by DB trigger (see migrations/001_transaction_balance_triggers.sql)
 exports.updateTransaction = async (req, res, next) => {
   const userId = req.user.id;
   const { id } = req.params;
   const updates = req.body;
 
   try {
-    // Get the existing transaction with all details
     const { data: existingTransaction, error: findError } = await supabase
       .from("transactions")
-      .select("id, account_id, amount, type")
+      .select("id")
       .eq("id", id)
       .eq("user_id", userId)
       .single();
@@ -116,67 +116,6 @@ exports.updateTransaction = async (req, res, next) => {
       return res.status(404).json({ error: "Transaction not found" });
     }
 
-    // Check if account or amount or type is being changed
-    const accountChanged = updates.account_id && updates.account_id !== existingTransaction.account_id;
-    const amountChanged = updates.amount && parseFloat(updates.amount) !== parseFloat(existingTransaction.amount);
-    const typeChanged = updates.type && updates.type !== existingTransaction.type;
-
-    // If account, amount, or type changed, we need to manually update balances
-    if (accountChanged || amountChanged || typeChanged) {
-      // Step 1: Revert the old transaction's effect on the old account
-      const { data: oldAccount } = await supabase
-        .from("accounts")
-        .select("balance")
-        .eq("id", existingTransaction.account_id)
-        .single();
-
-      if (oldAccount) {
-        let newOldBalance = parseFloat(oldAccount.balance);
-        
-        if (existingTransaction.type === 'expense') {
-          // Add back the expense amount
-          newOldBalance += parseFloat(existingTransaction.amount);
-        } else if (existingTransaction.type === 'income') {
-          // Subtract the income amount
-          newOldBalance -= parseFloat(existingTransaction.amount);
-        }
-
-        await supabase
-          .from("accounts")
-          .update({ balance: newOldBalance })
-          .eq("id", existingTransaction.account_id);
-      }
-
-      // Step 2: Apply the new transaction's effect on the new account
-      const newAccountId = updates.account_id || existingTransaction.account_id;
-      const newAmount = parseFloat(updates.amount || existingTransaction.amount);
-      const newType = updates.type || existingTransaction.type;
-
-      const { data: newAccount } = await supabase
-        .from("accounts")
-        .select("balance")
-        .eq("id", newAccountId)
-        .single();
-
-      if (newAccount) {
-        let newAccountBalance = parseFloat(newAccount.balance);
-        
-        if (newType === 'expense') {
-          // Subtract the expense amount
-          newAccountBalance -= newAmount;
-        } else if (newType === 'income') {
-          // Add the income amount
-          newAccountBalance += newAmount;
-        }
-
-        await supabase
-          .from("accounts")
-          .update({ balance: newAccountBalance })
-          .eq("id", newAccountId);
-      }
-    }
-
-    // Update transaction
     const { data, error } = await supabase
       .from("transactions")
       .update(updates)
