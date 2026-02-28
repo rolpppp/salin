@@ -1,9 +1,11 @@
 const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/auth.controller.js");
+const { validate } = require("../middleware/validate.js");
+const { loginSchema, registerSchema } = require("../schemas/index.js");
 
-router.post("/register", authController.registerUser);
-router.post("/login", authController.loginUser);
+router.post("/register", validate(registerSchema), authController.registerUser);
+router.post("/login", validate(loginSchema), authController.loginUser);
 router.post("/forgot-password", authController.forgotPassword);
 router.post("/reset-password", authController.resetPassword);
 router.get("/google", authController.googleSignIn);
