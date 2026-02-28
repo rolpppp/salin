@@ -147,7 +147,7 @@ export async function renderDashboardPage(app) {
 
       <div id="budget-card" class="card budget-card ${isBudgetExceeded ? "budget-exceeded" : ""}" style="cursor: pointer;">
         <div class="budget-info">
-          <span>Monthly Budget</span>
+          <span>${data.budget?.period_type === "semester" ? "Semester Budget" : "Monthly Budget"}</span>
           <span>₱${formatCurrency(budgetSpent)} / ₱${formatCurrency(budgetAmount)}</span>
         </div>
         <div class="budget-progress">

@@ -1,25 +1,48 @@
-const { start } = require("repl");
 const supabase = require("../config/supabase");
 
-// handles budget creation
+// handles budget creation (monthly or semester)
 exports.createBudget = async (req, res, next) => {
   const userId = req.user.id;
   const now = new Date();
-  const { amount, month } = req.body;
+  const {
+    amount,
+    month,
+    period_type = "monthly",
+    start_date,
+    end_date,
+  } = req.body;
   const year = now.getFullYear();
 
-  // checks if field inputs are filled
-  if (!amount || !month) {
-    return res
-      .status(400)
-      .json({ error: "Budget amount and month are required" });
+  if (!amount) {
+    return res.status(400).json({ error: "Budget amount is required" });
   }
 
-  // inserts the input values to the database
+  if (period_type === "monthly" && !month) {
+    return res.status(400).json({ error: "Month is required for monthly budgets" });
+  }
+
+  if (period_type === "semester" && (!start_date || !end_date)) {
+    return res.status(400).json({ error: "start_date and end_date are required for semester budgets" });
+  }
+
   try {
+    const insertPayload = {
+      user_id: userId,
+      amount,
+      period_type,
+    };
+
+    if (period_type === "monthly") {
+      insertPayload.month = month;
+      insertPayload.year = year;
+    } else {
+      insertPayload.start_date = start_date;
+      insertPayload.end_date = end_date;
+    }
+
     const { data, error } = await supabase
       .from("budgets")
-      .insert({ user_id: userId, amount, month, year })
+      .insert(insertPayload)
       .select()
       .single();
 
@@ -31,47 +54,79 @@ exports.createBudget = async (req, res, next) => {
   }
 };
 
-// gets the current budget
+// gets the active budget for today (monthly or semester)
 exports.getCurrentBudget = async (req, res, next) => {
   const userID = req.user.id;
   const now = new Date();
+  const today = now.toISOString().split("T")[0];
   const month = now.getMonth() + 1;
   const year = now.getFullYear();
 
   try {
-    const { data: budgetData, error } = await supabase
+    // Try to find a semester budget covering today first, then fall back to monthly
+    let budgetData = null;
+    let startDate, endDate;
+
+    const { data: semesterBudget, error: semErr } = await supabase
       .from("budgets")
-      .select("id, amount")
+      .select("id, amount, period_type, start_date, end_date")
       .eq("user_id", userID)
-      .eq("month", month)
-      .eq("year", year)
-      .single();
+      .eq("period_type", "semester")
+      .lte("start_date", today)
+      .gte("end_date", today)
+      .maybeSingle();
 
-    // handle case when no budget exists (PGRST116 error)
-    if (error && error.code !== "PGRST116") throw error;
+    if (semErr && semErr.code !== "PGRST116") throw semErr;
 
-    // calculate total spent
-    const startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+    if (semesterBudget) {
+      budgetData = semesterBudget;
+      startDate = semesterBudget.start_date;
+      endDate = semesterBudget.end_date;
+    } else {
+      // Monthly budget
+      const { data: monthlyBudget, error: monErr } = await supabase
+        .from("budgets")
+        .select("id, amount, period_type")
+        .eq("user_id", userID)
+        .eq("period_type", "monthly")
+        .eq("month", month)
+        .eq("year", year)
+        .maybeSingle();
+
+      if (monErr && monErr.code !== "PGRST116") throw monErr;
+
+      budgetData = monthlyBudget;
+      startDate = `${year}-${String(month).padStart(2, "0")}-01`;
+      endDate = today;
+    }
+
+    if (!budgetData) {
+      return res.status(200).json({ id: null, amount: 0, spent: 0, period_type: "monthly", month, year });
+    }
+
+    // Calculate total spent within the budget period
     const { data: spentData, error: spentError } = await supabase
       .from("transactions")
       .select("amount")
       .eq("user_id", userID)
       .eq("type", "expense")
       .gte("date", startDate)
-      .lte("date", now.toISOString().split("T")[0]);
+      .lte("date", endDate);
 
     if (spentError) throw spentError;
 
     const totalSpent = spentData.reduce(
-      (sum, transaction) => sum + parseFloat(transaction.amount),
+      (sum, t) => sum + parseFloat(t.amount),
       0
     );
 
-    // sends the json file of the data
     res.status(200).json({
-      id: budgetData.data.id,
-      amount: budgetData.data ? budgetData.data.amount : 0,
+      id: budgetData.id,
+      amount: parseFloat(budgetData.amount || 0),
       spent: totalSpent,
+      period_type: budgetData.period_type || "monthly",
+      start_date: budgetData.start_date || null,
+      end_date: budgetData.end_date || null,
       month,
       year,
     });

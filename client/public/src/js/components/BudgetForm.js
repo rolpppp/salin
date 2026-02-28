@@ -10,18 +10,40 @@ export function openBudgetForm(currentBudget = {}) {
   const monthName = now.toLocaleString("default", { month: "long" });
   const year = now.getFullYear();
   const month = now.getMonth() + 1;
+  const periodType = currentBudget.period_type || "monthly";
 
-  const title = `Set Budget for ${monthName} ${year}`;
+  const title = periodType === "semester"
+    ? `Set Semester Budget`
+    : `Set Budget for ${monthName} ${year}`;
 
   const formContent = `
         <form id="budget-form">
             <div class="form-group">
-                <label for="amount">Budget Amount</label>
+                <label for="period-type">Period</label>
+                <select id="period-type" class="form-control">
+                    <option value="monthly" ${periodType === "monthly" ? "selected" : ""}>Monthly (${monthName} ${year})</option>
+                    <option value="semester" ${periodType === "semester" ? "selected" : ""}>Semester (custom date range)</option>
+                </select>
+            </div>
+
+            <div id="semester-dates" style="display:${periodType === "semester" ? "block" : "none"}">
+                <div class="form-group">
+                    <label for="start-date">Semester Start</label>
+                    <input type="date" id="start-date" class="form-control" value="${currentBudget.start_date || ""}">
+                </div>
+                <div class="form-group">
+                    <label for="end-date">Semester End</label>
+                    <input type="date" id="end-date" class="form-control" value="${currentBudget.end_date || ""}">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="amount">Budget Amount (₱)</label>
                 <input type="number" id="amount" class="form-control" step="1.00" value="${
                   currentBudget.amount > 0
                     ? parseFloat(currentBudget.amount).toFixed(2)
                     : ""
-                }" placeholder="e.g., 500" required>
+                }" placeholder="e.g., 5000" required>
             </div>
             <div style="display: flex; gap: var(--space-sm);">
                 <button type="submit" class="btn btn-primary" style="flex: 1;">Save Budget</button>
@@ -32,29 +54,45 @@ export function openBudgetForm(currentBudget = {}) {
 
   showModal(title, formContent);
 
+  // Toggle semester date fields
+  document.getElementById("period-type").addEventListener("change", (e) => {
+    document.getElementById("semester-dates").style.display =
+      e.target.value === "semester" ? "block" : "none";
+  });
+
   const form = document.getElementById("budget-form");
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const submitBtn = form.querySelector('button[type="submit"]');
-
-    // show loading state
     submitBtn.classList.add("btn-loading");
     submitBtn.disabled = true;
 
+    const selectedPeriod = document.getElementById("period-type").value;
     const budgetData = {
-      month: month,
-      year: year,
       amount: parseFloat(document.getElementById("amount").value),
+      period_type: selectedPeriod,
     };
+
+    if (selectedPeriod === "monthly") {
+      budgetData.month = month;
+      budgetData.year = year;
+    } else {
+      budgetData.start_date = document.getElementById("start-date").value;
+      budgetData.end_date = document.getElementById("end-date").value;
+      if (!budgetData.start_date || !budgetData.end_date) {
+        showToast("Please set both start and end dates for semester budget.", "error");
+        submitBtn.classList.remove("btn-loading");
+        submitBtn.disabled = false;
+        return;
+      }
+    }
 
     try {
       if (currentBudget.id) {
-        // if budget exists, update it
-        await updateBudget(currentBudget.id, { amount: budgetData.amount });
+        await updateBudget(currentBudget.id, budgetData);
         showToast(`Budget updated to ₱${formatCurrency(budgetData.amount)}`);
       } else {
-        // if no budget exists, create new one
         await setBudget(budgetData);
         showToast(`Budget set to ₱${formatCurrency(budgetData.amount)}`);
       }
@@ -63,8 +101,6 @@ export function openBudgetForm(currentBudget = {}) {
       window.dispatchEvent(new CustomEvent("transactionsUpdated"));
     } catch (error) {
       showToast(error.message, "error");
-
-      // reset button state on error
       submitBtn.classList.remove("btn-loading");
       submitBtn.disabled = false;
     }
