@@ -1,11 +1,13 @@
 const supabase = require("../config/supabase");
 const webpush = require("web-push");
 
-webpush.setVapidDetails(
-  process.env.VAPID_EMAIL || "mailto:admin@salin.app",
-  process.env.VAPID_PUBLIC_KEY || "",
-  process.env.VAPID_PRIVATE_KEY || ""
-);
+if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+  webpush.setVapidDetails(
+    process.env.VAPID_EMAIL || "mailto:admin@salin.app",
+    process.env.VAPID_PUBLIC_KEY,
+    process.env.VAPID_PRIVATE_KEY
+  );
+}
 
 // save push subscription for the current user
 exports.subscribe = async (req, res, next) => {
