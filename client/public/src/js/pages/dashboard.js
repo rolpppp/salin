@@ -1,5 +1,6 @@
 import { renderErrorPage } from "../app.js";
 import { getDashboardData, getUser, getAccounts } from "../api.js";
+import { initPushNotifications } from "../push.js";
 import { openTransactionForm } from "../components/TransactionForm.js";
 import { openBudgetForm } from "../components/BudgetForm.js";
 import { openParseReviewModal } from "../components/ParseReview.js";
@@ -225,6 +226,9 @@ export async function renderDashboardPage(app) {
     // renders and attaches listeners for recent transactions and other dashboard elements
     renderRecentTransactions(data.recentTransactions);
     attachDashboardListeners();
+
+    // Request push notification permission once (for budget alerts)
+    initPushNotifications().catch(() => {});
   } catch (error) {
     renderErrorPage(app, error.message);
   }

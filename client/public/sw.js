@@ -67,6 +67,45 @@ self.addEventListener("activate", (event) => {
 });
 
 // ============================================================
+// Push Notifications — show budget alerts
+// ============================================================
+self.addEventListener("push", (event) => {
+  if (!event.data) return;
+
+  let payload;
+  try {
+    payload = event.data.json();
+  } catch {
+    payload = { title: "salin", body: event.data.text() };
+  }
+
+  event.waitUntil(
+    self.registration.showNotification(payload.title || "salin", {
+      body: payload.body || "",
+      icon: payload.icon || "/assets/icons/icon-192.png",
+      badge: payload.badge || "/assets/icons/salin.png",
+      data: payload.data || {},
+    })
+  );
+});
+
+self.addEventListener("notificationclick", (event) => {
+  event.notification.close();
+  const url = event.notification.data?.url || "/";
+  event.waitUntil(
+    clients.matchAll({ type: "window", includeUncontrolled: true }).then((windowClients) => {
+      for (const client of windowClients) {
+        if (client.url.includes(self.registration.scope) && "focus" in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      return clients.openWindow(url);
+    })
+  );
+});
+
+// ============================================================
 // Background Sync — replay queued offline requests
 // ============================================================
 self.addEventListener("sync", (event) => {

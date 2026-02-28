@@ -1,4 +1,5 @@
 const supabase = require("../config/supabase");
+const { sendBudgetAlert } = require("./push.controller");
 
 // get dashboard data
 exports.getDashboardData = async (req, res, next) => {
@@ -77,14 +78,33 @@ exports.getDashboardData = async (req, res, next) => {
     // handles the total spent
     const totalSpent = totalSpentData.data?.total || 0;
 
+    const budgetAmount = budgetData.data ? parseFloat(budgetData.data.amount || 0) : 0;
+    const budgetSpent = parseFloat(totalSpent || 0);
+    const budgetPercent = budgetAmount > 0 ? (budgetSpent / budgetAmount) * 100 : 0;
+
+    // Fire-and-forget budget alert push notifications at 80% and 100%
+    if (budgetAmount > 0) {
+      if (budgetPercent >= 100) {
+        sendBudgetAlert(userId, {
+          title: "Budget Exceeded!",
+          body: `You've spent ₱${budgetSpent.toFixed(2)} of your ₱${budgetAmount.toFixed(2)} monthly budget.`,
+        }).catch(() => {});
+      } else if (budgetPercent >= 80) {
+        sendBudgetAlert(userId, {
+          title: "Budget Warning — 80%",
+          body: `You've used ${budgetPercent.toFixed(0)}% of your monthly budget. Spend carefully!`,
+        }).catch(() => {});
+      }
+    }
+
     // prepares the data for the dashboard view
     const dashboardData = {
       totalBalance: totalBalance,
       recentTransactions: recentTransactionsData.data || [],
       budget: {
         id: budgetData.data ? budgetData.data.id : null,
-        amount: budgetData.data ? parseFloat(budgetData.data.amount || 0) : 0,
-        spent: parseFloat(totalSpent || 0),
+        amount: budgetAmount,
+        spent: budgetSpent,
       },
     };
     res.status(200).json(dashboardData);
