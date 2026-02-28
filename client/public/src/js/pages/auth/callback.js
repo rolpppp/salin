@@ -73,7 +73,7 @@ async function processOAuthCallback() {
     const response = await handleOAuthCallback(access_token, refresh_token);
 
     // store user data and token (default to localStorage for OAuth logins)
-    setAuthData(response.token, response.user, true);
+    setAuthData(response.token, response.user, true, response.supabase_access_token);
 
     // check if user needs onboarding (check if they have set up their username and have accounts)
     if (!response.user.username) {

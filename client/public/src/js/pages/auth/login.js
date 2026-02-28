@@ -175,10 +175,10 @@ function attachFormListeners(app, isLogin) {
         const rememberMe = document.getElementById("remember-me").checked;
         
         data = await loginUser(email, password, rememberMe);
-        
+
         // use storage utility to save auth data in appropriate storage
-        setAuthData(data.token, data.user, rememberMe);
-        
+        setAuthData(data.token, data.user, rememberMe, data.supabase_access_token);
+
         window.location.hash = "#/dashboard";
       } else {
         data = await registerUser(email, password);
@@ -188,7 +188,7 @@ function attachFormListeners(app, isLogin) {
         );
         // after successful registration, redirect to onboarding page
         // default to sessionStorage for new registrations
-        setAuthData(data.token, data.user, false);
+        setAuthData(data.token, data.user, false, data.supabase_access_token);
         window.location.hash = "#/onboarding";
       }
     } catch (error) {

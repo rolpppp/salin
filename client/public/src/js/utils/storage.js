@@ -21,14 +21,35 @@ function getActiveStorage() {
  * @param {string} token - JWT token
  * @param {object} user - User object
  * @param {boolean} rememberMe - Whether to persist session
+ * @param {string|null} supabaseToken - Supabase access token for realtime
  */
-export function setAuthData(token, user, rememberMe = false) {
+export function setAuthData(token, user, rememberMe = false, supabaseToken = null) {
   const storage = rememberMe ? localStorage : sessionStorage;
   storage.setItem("token", token);
   storage.setItem("user", JSON.stringify(user));
   if (user.id) {
     storage.setItem("user_id", user.id);
   }
+  if (supabaseToken) {
+    storage.setItem("supabase_token", supabaseToken);
+  }
+}
+
+/**
+ * Get the Supabase access token for realtime subscriptions
+ * @returns {string|null}
+ */
+export function getRealtimeToken() {
+  return localStorage.getItem("supabase_token") || sessionStorage.getItem("supabase_token");
+}
+
+/**
+ * Set the Supabase access token for realtime subscriptions
+ * @param {string} token
+ */
+export function setRealtimeToken(token) {
+  const storage = localStorage.getItem("token") ? localStorage : sessionStorage;
+  storage.setItem("supabase_token", token);
 }
 
 /**
@@ -65,10 +86,12 @@ export function clearAuthData() {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
   localStorage.removeItem("user_id");
+  localStorage.removeItem("supabase_token");
 
   sessionStorage.removeItem("token");
   sessionStorage.removeItem("user");
   sessionStorage.removeItem("user_id");
+  sessionStorage.removeItem("supabase_token");
 }
 
 /**

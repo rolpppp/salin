@@ -213,10 +213,14 @@ export async function renderDashboardPage(app) {
       </footer>
     `;
 
-    // event listener for updating transactions, re-renders the dashboard
-    window.addEventListener("transactionsUpdated", () => {
-      renderDashboardPage(app);
-    });
+    // Re-render dashboard on any realtime data change
+    const onRealtimeChange = () => renderDashboardPage(app);
+    window.addEventListener("salin:transactions-changed", onRealtimeChange);
+    window.addEventListener("salin:accounts-changed", onRealtimeChange);
+    window.addEventListener("salin:budgets-changed", onRealtimeChange);
+
+    // Legacy local event (fired after manual form submits)
+    window.addEventListener("transactionsUpdated", onRealtimeChange);
 
     // renders and attaches listeners for recent transactions and other dashboard elements
     renderRecentTransactions(data.recentTransactions);

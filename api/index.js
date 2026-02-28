@@ -10,6 +10,7 @@ app.use(cors()); // enable frontend-to-backend communication
 app.use(express.json()); // allow for reading json requests
 
 // api routes
+app.use("/api/config", require("./_app/routes/config.routes.js"));
 app.use("/api/auth", require("./_app/routes/auth.routes.js"));
 app.use("/api/user", require("./_app/routes/user.routes.js"));
 app.use("/api/transactions", require("./_app/routes/transaction.routes.js"));

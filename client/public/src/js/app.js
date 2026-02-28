@@ -26,6 +26,7 @@ import { renderResetPasswordPage } from "./pages/auth/resetPassword.js";
 import { renderOnboardingPage } from "./pages/onboarding.js";
 import { renderOAuthCallbackPage } from "./pages/auth/callback.js";
 import { getAuthToken } from "./utils/storage.js";
+import { initRealtime, destroyRealtime } from "./realtime.js";
 
 const app = document.getElementById("app");
 
@@ -71,6 +72,11 @@ function router() {
   ) {
     window.location.hash = "#/dashboard";
     return;
+  }
+
+  // start realtime subscriptions when on an authenticated page
+  if (token) {
+    initRealtime();
   }
 
   // route to the correct page

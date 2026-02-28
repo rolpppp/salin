@@ -35,6 +35,7 @@ exports.registerUser = async (req, res, next) => {
     res.status(201).json({
       message: "User created successfully.",
       token,
+      supabase_access_token: newUser.session?.access_token || null,
       user: { id: newUser.user.id, email: newUser.user.email },
     });
 
@@ -98,6 +99,7 @@ exports.loginUser = async (req, res, next) => {
       res.status(200).json({
         message: "Log in successful",
         token,
+        supabase_access_token: data.session?.access_token || null,
         user: {
           id: data.user.id,
           email: data.user.email,
@@ -281,6 +283,7 @@ exports.handleOAuthCallback = async (req, res, next) => {
     res.status(200).json({
       message: "Authentication successful",
       token,
+      supabase_access_token: data.session?.access_token || null,
       user: {
         id: data.user.id,
         email: data.user.email,
