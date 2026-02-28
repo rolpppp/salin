@@ -84,4 +84,65 @@
   --breakpoint-md: 768px;
   --breakpoint-lg: 1024px;
   --breakpoint-xl: 1280px;
+
+  /* Skeleton loader */
+  --skeleton-base: #e5e7eb;
+  --skeleton-highlight: #f3f4f6;
+}
+
+/* ==========================================================================
+   SKELETON LOADERS
+   ========================================================================== */
+@keyframes shimmer {
+  0%   { background-position: -400px 0; }
+  100% { background-position: 400px 0; }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--skeleton-base) 25%,
+    var(--skeleton-highlight) 50%,
+    var(--skeleton-base) 75%
+  );
+  background-size: 800px 100%;
+  animation: shimmer 1.4s infinite linear;
+  border-radius: var(--border-radius);
+}
+
+/* Named skeleton shapes */
+.skeleton-text    { height: 1rem;  width: 100%; }
+.skeleton-text-sm { height: 0.75rem; width: 60%; }
+.skeleton-title   { height: 1.5rem; width: 40%; }
+.skeleton-circle  { border-radius: 50%; }
+.skeleton-card    { height: 120px; width: 100%; }
+.skeleton-row     { height: 2.5rem; width: 100%; border-radius: 0; }
+
+/* Dashboard skeleton layout */
+.skeleton-dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.skeleton-dashboard .skeleton-header {
+  height: 3rem;
+  width: 50%;
+}
+
+.skeleton-dashboard .skeleton-balance-card {
+  height: 160px;
+}
+
+.skeleton-dashboard .skeleton-budget-card {
+  height: 90px;
+}
+
+.skeleton-dashboard .skeleton-list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-sm) 0;
+  border-bottom: 1px solid var(--border-color);
+  gap: var(--space-md);
 }

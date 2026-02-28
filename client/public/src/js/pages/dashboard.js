@@ -52,6 +52,23 @@ function getAccountColor(type) {
 
 // renders the main dashboard page, unifying various financial data
 export async function renderDashboardPage(app) {
+  // Show skeleton while data loads
+  app.innerHTML = `
+    <div class="skeleton-dashboard">
+      <div class="skeleton skeleton-header"></div>
+      <div class="card skeleton skeleton-balance-card"></div>
+      <div class="card skeleton skeleton-budget-card"></div>
+      <div class="card">
+        ${Array(5).fill(0).map(() => `
+          <div class="skeleton-dashboard skeleton-list-item">
+            <div style="flex:1"><div class="skeleton skeleton-text" style="width:70%;margin-bottom:4px"></div><div class="skeleton skeleton-text-sm"></div></div>
+            <div class="skeleton skeleton-text" style="width:80px"></div>
+          </div>
+        `).join("")}
+      </div>
+    </div>
+  `;
+
   try {
     // fetches dashboard data, user info, and all accounts concurrently
     const [data, user, accounts] = await Promise.all([

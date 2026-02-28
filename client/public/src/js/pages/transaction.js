@@ -20,7 +20,14 @@ let sortDirection = "desc";
 let activeFilters = {}; // persisted across page changes
 
 export async function renderTransactionsPage(app) {
-  app.innerHTML = '<div class="loading-spinner"></div>';
+  app.innerHTML = `
+    <div class="skeleton-dashboard">
+      <div class="skeleton skeleton-title" style="width:200px;margin-bottom:var(--space-md)"></div>
+      <div class="card">
+        ${Array(8).fill(0).map(() => `<div class="skeleton skeleton-row" style="margin-bottom:4px"></div>`).join("")}
+      </div>
+    </div>
+  `;
 
   try {
     const [transactionsResponse, categoriesResponse, accountsResponse] =
